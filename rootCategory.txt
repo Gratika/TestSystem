@@ -1,0 +1,8 @@
+TestCategoryTS 
+Математика
+TestCategoryTS 
+Естественные науки
+TestCategoryTS
+Языки
+TestCategoryTS 
+Информатика
