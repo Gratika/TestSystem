@@ -1,0 +1,9 @@
+4
+TestCategoryTS
+Арифметика
+TestCategoryTS
+Алгебра
+TestCategoryTS
+Математический анализ
+TestTS
+Сложение и вычитание чисел

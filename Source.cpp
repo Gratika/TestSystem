@@ -11,6 +11,15 @@ int main() {
 	//sl.showMainMenu();
 	StructureTS st;
 	st.print();
-	
+	/*ofstream out("Математика.txt");
+	out << "TestCategoryTS" << endl;
+	out << "Арифметика" << endl;
+	out << "TestCategoryTS" << endl;
+	out << "Алгебра" << endl;
+	out << "TestCategoryTS" << endl;
+	out << "Математический анализ" << endl;
+	out << "TestTS" << endl;
+	out << "Сложение и вычитание чисел" << endl;	
+	out.close();*/
 
 }

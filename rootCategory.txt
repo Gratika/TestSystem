@@ -1,8 +1,9 @@
-TestCategoryTS 
-РњР°С‚РµРјР°С‚РёРєР°
-TestCategoryTS 
-Р•СЃС‚РµСЃС‚РІРµРЅРЅС‹Рµ РЅР°СѓРєРё
+4
 TestCategoryTS
-РЇР·С‹РєРё
-TestCategoryTS 
-РРЅС„РѕСЂРјР°С‚РёРєР°
+Математика
+TestCategoryTS
+Естественные науки
+TestCategoryTS
+Языки
+TestCategoryTS
+Информатика

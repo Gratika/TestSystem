@@ -61,8 +61,14 @@ public:
 	}
 	
 	virtual void print() override {
-		for (auto i : elements)
+		int id = 1;
+		cout << this->name << endl;
+		for (auto i : elements) {
+			cout << id << " ";
 			i->print();
+			id++;
+		}
+			
 	}
 	
 	void remove(int id) override {
@@ -78,6 +84,45 @@ public:
 
 	bool isComposite()override { return true; }
 
+	void loadFromFile(ObjectFactory<IElementTS>*& f)override {
+		string fileName = this->getFilename(), elName, elType;
+		ifstream inp(fileName);
+		if (inp.is_open()) {
+			int cnt;
+			inp >> cnt; inp.ignore(2, '\n');
+			for (int i = 0; i < cnt; i++) {
+				getline(inp, elType);
+				getline(inp, elName);
+				try {
+					IElementTS* elem = f->create(elType);
+					elem->setParam(elName);
+					this->add(elem);
+				}
+				catch (ObjectCreatorError err) {
+					cout << err.getError();
+				}
+			}
+			inp.close();
+		}
+		for (IElementTS* el : this->elements) {
+			el->loadFromFile(f);
+		}
+	}
+
+	void saveToFile()override {
+		string fileName = this->getFilename();
+		ofstream out(fileName);
+		out << this->getSize() << endl;
+		for (auto i : this->elements) {
+			out << i->getType() << endl;
+			out << i->getName() << endl;
+		}
+		out.close();
+		for (IElementTS* el : this->elements) {
+			el->saveToFile();
+		}
+	}
+
 };
 
 class TestCategoryTS: public ConteinerTS {
@@ -86,11 +131,13 @@ public:
 		this->elType = "TestCategoryTS";
 	}
 	
-	void loadFromFile(ObjectFactory<IElementTS> *&f)override {
+	/*void loadFromFile(ObjectFactory<IElementTS> *&f)override {
 		string fileName = this->getFilename() ,elName, elType;
 		ifstream inp(fileName);
 		if (inp.is_open()) {
-			while (!inp.eof()) {
+			int cnt;
+			inp >> cnt; inp.ignore(2,'\n');
+			for (int i = 0; i < cnt; i++) {
 				getline(inp, elType);
 				getline(inp, elName);
 				try {
@@ -104,16 +151,17 @@ public:
 			}			
 			inp.close();
 		}
-	}
-	void saveToFile()override {
+	}*/
+	/*void saveToFile()override {
 		string fileName = this->getFilename();
 		ofstream out(fileName);
+		out << this -> getSize()<<endl;
 		for (auto i : this->elements) {
 			out << i->getType() << endl;
 			out << i->getName() << endl;			
 		}
 		out.close();
-	}
+	}*/
 };
 
 class TestTS : public ConteinerTS {
