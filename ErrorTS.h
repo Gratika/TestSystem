@@ -35,3 +35,9 @@ public:
 	~ObjectInfoNotFound(){}
 };
 
+class OutOfRangeError :public ErrorTS {
+public:
+	OutOfRangeError(string msg) :ErrorTS(msg) {}
+	~OutOfRangeError(){}
+};
+

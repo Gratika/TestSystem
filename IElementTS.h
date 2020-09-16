@@ -5,6 +5,7 @@
 #include<Windows.h>
 #include <vector>
 #include "ObjectFactory.h"
+#include"ErrorTS.h"
 #include<iomanip>
 using namespace std;
 
@@ -21,7 +22,7 @@ public:
 	string getType() { return this->elType; }
 	virtual int getSize() = 0;
 	virtual bool isComposite() { return false; }
-	virtual void setParam(string name) {
+	virtual void setParam(string name, int No = 0) {
 		this->name = name;		
 	}
 	virtual void loadFromFile(ObjectFactory<IElementTS> *&f) {}
@@ -32,6 +33,9 @@ public:
 		cout << name << endl;
 	}
 	virtual IElementTS* getElement(int id) = 0;
+	virtual void show() {
+		this->print();
+	}
 	virtual ~IElementTS()=0 {}
 protected:
 	string getFilename() {
@@ -40,13 +44,13 @@ protected:
 };
 class Leaf : public IElementTS {
 public:
-	void print()override{}
 	int getSize()override {
 		return 0;
 	}
 	IElementTS* getElement(int id)override {
 		return nullptr;
 	}
+
 };
 
 class ConteinerTS :public IElementTS {
@@ -60,7 +64,7 @@ public:
 		elem->setParent(this);
 	}
 	
-	virtual void print() override {
+	/*virtual void print() override {
 		int id = 1;
 		cout << this->name << endl;
 		for (auto i : elements) {
@@ -69,6 +73,13 @@ public:
 			id++;
 		}
 			
+	}*/
+	virtual void show() override {		
+		for (int i = 0; i < this->elements.size(); i++) {
+			cout << i+1 << " ";
+			this->elements[i]->print();			
+		}
+
 	}
 	
 	void remove(int id) override {
@@ -79,6 +90,7 @@ public:
 		return this->elements.size();
 	}
 	IElementTS* getElement(int id)override {
+		if (id<0 || id>this->elements.size()) throw OutOfRangeError("¬ыход за пределы допустимого диапазона");
 		return elements[id];
 	}
 
@@ -121,6 +133,9 @@ public:
 		for (IElementTS* el : this->elements) {
 			el->saveToFile();
 		}
+	}
+	virtual ~ConteinerTS() {
+		this->elements.~vector();
 	}
 
 };
@@ -208,32 +223,57 @@ public:
 		}
 		out.close();
 	}
+	void print()override {
+		cout << name <<" (тест)"<< endl;
+	}
+
+	/*void show()override {
+		this->loadFromFile();
+	}*/
 };
 
 class QuestionTS : public ConteinerTS {
+private: int number;
 public:
 	QuestionTS() {
 		this->elType = "QuestionTS";
 	}
-	void print()override{}
+	void setParam(string name, int No=0)override {
+		IElementTS::setParam(name);
+		this->number = No;
+	}
+	void print()override{
+		cout << number << " " << this->name;
+	}
+	/*void show()override {
+		
+		for (IElementTS* el : this->elements) {
+			el->show();
+		}
+	}*/
 };
 
 class AnswerTS : public Leaf {
 	bool isCorect = false;
+    int number;
 public:
 	AnswerTS(){
 		this->elType = "AnswerTS";
 	}
-	void setParam(string name)override {
+	void setParam(string name, int No = 0)override {
 		char c = name[0];
 		if (c == '+') this->isCorect = true;
 		name.erase(0);
-		this->name = name;		
+		IElementTS::setParam(name);
+		this->number = No;
+
 	}
 	string getName()override {
-		if (this->isCorect)
-			return "+" + this->name;
+		if (this->isCorect)	return "+" + this->name;
 		else return "-" + this->name;
+	}
+	void print()override {
+		cout << number << " " << this->name;
 	}
 
 	
