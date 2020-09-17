@@ -13,11 +13,14 @@ using namespace std;
 
 class SystemLogin {
 	map<string, long>pass;
+	vector <SystemUser*> users;
+	SystemUser* suser = nullptr;
 	ObjectFactory<SystemUser> *ufactory =nullptr;
 	
 public:
 	SystemLogin(){
 		loadPasswordFromFile();
+		loadUsersFromFile();
 		ufactory = new ObjectFactory<SystemUser>();
 		ufactory->add("SystemStudend", new ObjectCreator< SystemStudend, SystemUser>);
 		ufactory->add("SystemAdmin", new ObjectCreator<SystemAdmin, SystemUser>);
@@ -124,10 +127,15 @@ public:
 		password = getPassword();
 		hash<string> h;
 		long hpass = h(password);
-		pass[login] = hpass;
-		savePasswordToFile();
-		saveNewUser(login,role, sname, name, lname, address, phone);
-		cout << "\nРегистрация успешна. Выполните вход в систему, чтобы начать работу\n" << endl;
+		pass[login] = hpass;		
+		try {
+			SystemUser* newUser = ufactory->create(role);
+			newUser->setParam(login, role, sname, name, lname, address, phone);
+			users.push_back(newUser);
+			cout << "\nРегистрация успешна. Выполните вход в систему, чтобы начать работу\n" << endl;
+		}
+		catch (ObjectCreatorError err) { cout << err.getError(); }
+		
 		system("pause");
 
 
@@ -149,7 +157,59 @@ public:
 			Sleep(1000);
 		}
 	}
-private:
+	void loadUsersFromFile() {
+		int cnt;
+		string login, role, name, lname, sname, address, phone;
+		ifstream inp("Users.txt");
+		if (!inp.is_open()) throw FileError("Users.txt", "Не могу получить информацию о пользователях!");
+		inp >> cnt; inp.ignore(2, '\n');
+		for(int i=0; i<cnt; i++)
+		{
+			getline(inp, login);
+			getline(inp, role);
+			getline(inp, sname);
+			getline(inp, name);
+			getline(inp, lname);
+			getline(inp, address);
+			getline(inp, phone);			
+			SystemUser* suser = ufactory->create(role);
+			suser->setParam(login, role, sname, name, lname, address, phone);
+			users.push_back(suser);
+		} 
+		inp.close();
+	}
+
+	void saveUsersToFile() {
+		ofstream out("Users.txt");
+		out << users.size();
+		for (auto s : users) {
+			out << s->getLogin() << endl;
+			out << s->getRole() << endl;
+			out << s->getSurname() << endl;
+			out << s->getName() << endl;
+			out << s->getLastName() << endl;
+			out << s->getAddress() << endl;
+			out << s->getPhone() << endl;
+		}
+		out.close();
+	}
+
+	SystemUser* findUser(string login) {
+		for (auto s : users) {
+			if (s->getLogin() == login) return s;
+		}
+		return nullptr;
+	}
+	void deleteUser(string lgn) {
+		bool flag = false;
+		int j = 0;
+		for (j < users.size(); j++ && !flag;) {
+			if (users[j]->getLogin() == lgn) flag = true;
+		}
+		if(!flag) cout << "Пользователь не найден" << endl;
+		else users.erase(users.begin()+j);
+	}
+
 	void createAdmin() {
 		system("cls");
 		cout << "Необходимо создать учетную запись администратора системы" << endl;
@@ -181,33 +241,22 @@ private:
 		if (rec != pass.end()) return true;
 		else return false;
 	}
-	void saveNewUser(string login, string role, string surname, string name, string lastname, string address, string phone) {
-		ofstream out("Users.txt", ios::app);
-		out << login << endl;
-		out << role << endl;
-		out << surname << endl;
-		out << name << endl;
-		out << lastname << endl;
-		out << address << endl;
-		out << phone << endl;
-		out.close();
-	}
+	
 	void createSystemUser(string ulogin) {
-		string login, role, name, lname, sname, address, phone;
-		ifstream inp("Users.txt");
-		if (!inp.is_open()) throw FileError("Users.txt", "Не могу получить информацию о пользователе!");
-		do {
-			getline(inp, login);
-			getline(inp, role);
-			getline(inp, sname);
-			getline(inp, name);
-			getline(inp, lname);
-			getline(inp, address);
-			getline(inp, phone);
-		} while (login != ulogin && !inp.eof());
-		if (login != ulogin) throw ObjectInfoNotFound("Информация о пользователе отсутствует. Рекомендуется повторно зарегистрироваться");
-		SystemUser* suser = ufactory->create(role);
-		suser->setParam(login, role, sname, name, lname, address, phone);
-		suser->showMenu();
+		suser = this->findUser(ulogin);
+		if (suser == nullptr)
+			cout << "Информация о пользователе отсутствует. Рекомендуется еще раз пройти регистрацию" << endl;
+		else suser->showMenu();
+	}
+	ObjectFactory<SystemUser>* getUserFactory() { return this->ufactory; }
+	SystemUser* getSystemUser() { return this->suser; }
+	
+	~SystemLogin() {
+		this->savePasswordToFile();
+		this->saveUsersToFile();
+		if (suser != nullptr) delete suser;
+		if (ufactory != nullptr) delete ufactory;
+		pass.clear();
 	}
 };
+

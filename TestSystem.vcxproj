@@ -139,8 +139,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="SystemLogin.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CommandTS.h" />
     <ClInclude Include="ErrorTS.h" />
     <ClInclude Include="IElementTS.h" />
     <ClInclude Include="MyArrayList.h" />
