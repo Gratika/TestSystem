@@ -4,6 +4,7 @@
 #include<Windows.h>
 #include"ErrorTS.h"
 #include"IElementTS.h"
+
 using namespace std;
 class SystemUser {
 protected:
@@ -11,12 +12,12 @@ protected:
 	string role;
 	string sname;
 	string name;
-	string lname;	
+	string lname;
 	string address;
 	string phone;
 public:
-	SystemUser(){}
-	virtual void setParam(string login,	string role,string sname, string name, string lname,string address,	string phone) {
+	SystemUser() {}
+	virtual void setParam(string login, string role, string sname, string name, string lname, string address, string phone) {
 		this->login = login;
 		this->role = role;
 		this->sname = sname;
@@ -25,14 +26,10 @@ public:
 		this->address = address;
 		this->phone = phone;
 	}
-	virtual string showMenu(){
-		system("cls");
-		cout << "Пользователь " << login << "( " << getUserFio() << ")\n" << endl;
-		cout << "--------------------------------------------------------\n"<<endl;
-		cout << "Какое действие Вы хотите выполнить?" << endl;
-	}
-	virtual void createCategory(IElementTS* root_, ObjectFactory<IElementTS>* factory_){}
-	virtual void createTest(IElementTS* root_, ObjectFactory<IElementTS>* factory_){}
+	virtual string showMenu() {}
+	//virtual void createCategory(IElementTS* root_, ObjectFactory<IElementTS>* factory_) {}
+	//virtual void createTest(IElementTS* root_, ObjectFactory<IElementTS>* factory_) {}
+	virtual void editUser(SystemUser* s) {}		
 	string getLogin() { return this->login; }
 	string getRole() { return this->role; }
 	string getSurname() { return this->sname; }
@@ -40,34 +37,34 @@ public:
 	string getLastName() { return this->lname; }
 	string getAddress() { return this->address; }
 	string getPhone() { return this->phone; }
-	
-	void setLogin(string login) {this->login = login; }
-	void setRole(string role) {this->role= role; }
-	void setSurname(string sname) {this->sname= sname; }
-	void setName(string name) {this->name= name; }
-	void setLastName(string lname) {this->lname= lname; }
-	void setAddress(string address) {this->address = address; }
-	void setPhone(string phone) {this->phone = phone; }
-	virtual ~SystemUser(){};
+
+	void setLogin(string login) { this->login = login; }
+	void setRole(string role) { this->role = role; }
+	void setSurname(string sname) { this->sname = sname; }
+	void setName(string name) { this->name = name; }
+	void setLastName(string lname) { this->lname = lname; }
+	void setAddress(string address) { this->address = address; }
+	void setPhone(string phone) { this->phone = phone; }
+	virtual ~SystemUser() {};
 
 protected:
-	virtual IElementTS* getCategory(IElementTS* root_) {
-		IElementTS* elm = root_;		
+	/*virtual IElementTS* getCategory(IElementTS* root_) {
+		IElementTS* elm = root_;
 		int ch;
 		do {
 			cout << "0 - Текущая категория;" << endl;
 			elm->show();
-			ch=getValue();			
+			ch = getValue();
 			if (ch != 0)
 				try { elm = elm->getElement(ch); }
 			catch (OutOfRangeError err) {
-				cout << "Ошибка! "<<err.getError() << endl;
+				cout << "Ошибка! " << err.getError() << endl;
 			}
 
 		} while (ch != '0');
-	}
+	}*/
 
-	double getValue() {
+	/*double getValue() {
 		double a;
 		while (true) {
 			cin >> a;
@@ -82,38 +79,40 @@ protected:
 			}
 		}
 
-	}
-
-private:
-	string getUserFio(){
+	}*/
+	string getUserFio() {
 		return sname + " " + name[0] + ". " + lname[0] + ".";
 	}
 };
 
 class SystemStudend :public SystemUser {
 public:
-	SystemStudend():SystemUser(){}
-	string showMenu() override{
+	SystemStudend() :SystemUser() {}
+	string showMenu() override {
+		char m;
 		do {
-		SystemUser::showMenu();
-			char m;
-			cout << "\n0- Вернуться в главное меню \n1- Пройти тестирование\n2- Посмотреть результаты\n3- Продолжить тестирование\n4" << endl;
+			system("cls");
+			cout << "Пользователь " << login << "( " << getUserFio() << ")\n" << endl;
+			cout << "--------------------------------------------------------\n" << endl;
+			cout << "Какое действие Вы хотите выполнить?" << endl;			
+			cout << "\n0- Выход \n1- Пройти тестирование\n2- Посмотреть результаты\n3- Продолжить тестирование\n4" << endl;
 			cin >> m;
 			cin.ignore();
 			switch (m)
 			{
 			case '0':
-				return;
+				return "exit";
 			case '1':
-				break;
-			case '2': break;
+				return "";
+			case '2': 
+				return "";
 			case '3':
-				break;
+				return "";
 			default:
 				cout << "Ошибка ввода. Нет такого пункта меню" << endl;
 				break;
 			}
-		} while (true);	    
+		} while (m>='0' && m<'4');
 	}
 	void getResult() {
 		//открыть файл с названием = логин
@@ -130,117 +129,129 @@ public:
 };
 
 class SystemAdmin : public SystemUser {
-	
-public:
-	SystemAdmin():SystemUser(){}	
-	void createCategory(IElementTS* root_, ObjectFactory<IElementTS>* factory_)override {
-		string creatorId = "TestCategoryTS";
-		IElementTS* newElem = this->createNewElement(factory_, creatorId);
-		cout << "В какую категорию поместить: " << endl;
-		IElementTS* category_ = this->getCategory(root_);
-		category_->add(newElem);
-	}
 
-	void createTest(IElementTS* root_, ObjectFactory<IElementTS>* factory_) override {
-		string creatorId = "TestTS";
-		IElementTS* newElem = this->createNewElement(factory_, creatorId);
-		cout << "В какую категорию поместить: " << endl;
-		IElementTS* category_ = this->getCategory(root_);
-		category_->add(newElem);
-		char ch = 'н';
-		do {
-			IElementTS* question_ = this->createNewQuestion(newElem->getName());
-			newElem->add(question_);
-			cout << "Добавить еще один вопрос к тесту?(д/н) ";
-			cin >> ch;
-			cin.ignore(2, '\n');
-		} while (ch == 'д');
-		newElem->saveToFile();
-	}
-	//TODO: закончить процедуру удаления объектов;
-	void deleteElementTS(IElementTS* root_){
-		cout << "Что будем удалять: " << endl;
-		IElementTS* delElem = this->getCategory(root_);
-	}
-	
-	void EditUser(SystemLogin &sLgn){		
-		char rpt = 'н',ch;
+public:
+	SystemAdmin() :SystemUser() {}
+	string showMenu() override {
+		char m;
 		do {
 			system("cls");
-			cout << "Редактирование пользователя" << endl;
-			cout << "----------------------------------------\n";
-			cout << "Укажите логин пользователя для поиска: ";
-			string login = this->getLogin();
-			SystemUser* s = sLgn.findUser(login);
-			if (s == nullptr)cout << "Пользователь не найден" << endl;
-			else {
-				string st, login, password, name, lname, sname, address, phone;
-				do {
-					cout << "Что будем менять?" << endl;
-					cout << "1- Фамилию;\n2- Имя;\n3- Отчество;\n4- Домашний адрес;\n5- Телефон;\n6- Логин;\n0- Выход\n";
-					cin >> ch; cin.ignore(2, '\n');
-					switch (ch)
-					{
-					case '1':
-						cout << "Укажите новую фамилию: ";
-						getline(cin, st);
-						s->setSurname(st);
-						break;
-					case '2':
-						cout << "Укажите новое имя: ";
-						getline(cin, st);
-						s->setName(st);
-						break;
-					case '3':
-						cout << "Укажите новое отчество: ";
-						getline(cin, st);
-						s->setLastName(st);
-						break;
-					case '4':
-						cout << "Укажите новый домашний адрес: ";
-						getline(cin, st);
-						s->setAddress(st);
-						break;
-					case '5':
-						cout << "Укажите новый телефон: ";
-						getline(cin, st);
-						s->setPhone(st);
-						break;
-					case '6':
-						cout << "Укажите новый логин: ";
-						st=this->getLogin();
-						s->setLogin(st);
-						break;					
-					case '0':
-						return;
-					default:
-						cout << "Ошибка! Нет такого пункта меню" << endl;
-						break;
-						break;
-					}
-				} while (true);
+			cout << "Пользователь " << login << "( " << getUserFio() << ")\n" << endl;
+			cout << "--------------------------------------------------------\n" << endl;
+			cout << "Какое действие Вы хотите выполнить?" << endl;
+			cout << "\n0- Выход \n1- Создать новую категорию\n2- Создать новый тест\n3- Изменить данные пользователя" << endl;
+			cout << "4- Зарегистрировать нового пользователя\n5- Удалить пользователя " << endl;
+
+			cin >> m;
+			cin.ignore();
+			switch (m)
+			{
+			case '0':
+				return "exit";
+			case '1':
+				return "createCategory";
+			case '2':
+				return "createTest";
+			case '3':
+				return"adminEditUser";
+			case '4':
+				return"adminCreateUser";
+			case '5':
+				return"adminDeleteUser";
+			default:
+				cout << "Ошибка ввода. Нет такого пункта меню" << endl;
+				break;
 			}
+		} while (m >= '0' && m < '6');
+	}
+	//void createCategory(IElementTS* root_, ObjectFactory<IElementTS>* factory_)override {
+	//	string creatorId = "TestCategoryTS";
+	//	IElementTS* newElem = this->createNewElement(factory_, creatorId);
+	//	cout << "В какую категорию поместить: " << endl;
+	//	IElementTS* category_ = this->getCategory(root_);
+	//	category_->add(newElem);
+	//}
+
+	//void createTest(IElementTS* root_, ObjectFactory<IElementTS>* factory_) override {
+	//	string creatorId = "TestTS";
+	//	IElementTS* newElem = this->createNewElement(factory_, creatorId);
+	//	cout << "В какую категорию поместить: " << endl;
+	//	IElementTS* category_ = this->getCategory(root_);
+	//	category_->add(newElem);
+	//	char ch = 'н';
+	//	do {
+	//		IElementTS* question_ = this->createNewQuestion(newElem->getName());
+	//		newElem->add(question_);
+	//		cout << "Добавить еще один вопрос к тесту?(д/н) ";
+	//		cin >> ch;
+	//		cin.ignore(2, '\n');
+	//	} while (ch == 'д');
+	//	newElem->saveToFile();
+	//}
+	////TODO: закончить процедуру удаления объектов;
+	//void deleteElementTS(IElementTS* root_) {
+	//	cout << "Что будем удалять: " << endl;
+	//	IElementTS* delElem = this->getCategory(root_);
+	//}
+
+	void editUser(SystemUser* s) override {
+		system("cls");
+		cout << "Редактирование пользователя " <<s->getLogin()<< endl;
+		cout << "----------------------------------------\n";
+		char rpt = 'н', ch;
+		do {
+			string st, login, password, name, lname, sname, address, phone;
+			do {
+				cout << "Что будем менять?" << endl;
+				cout << "1- Фамилию;\n2- Имя;\n3- Отчество;\n4- Домашний адрес;\n5- Телефон;\n6- Логин;\n0- Выход\n";
+				cin >> ch; cin.ignore(2, '\n');
+				switch (ch)
+				{
+				case '1':
+					cout << "Укажите новую фамилию: ";
+					getline(cin, st);
+					s->setSurname(st);
+					break;
+				case '2':
+					cout << "Укажите новое имя: ";
+					getline(cin, st);
+					s->setName(st);
+					break;
+				case '3':
+					cout << "Укажите новое отчество: ";
+					getline(cin, st);
+					s->setLastName(st);
+					break;
+				case '4':
+					cout << "Укажите новый домашний адрес: ";
+					getline(cin, st);
+					s->setAddress(st);
+					break;
+				case '5':
+					cout << "Укажите новый телефон: ";
+					getline(cin, st);
+					s->setPhone(st);
+					break;
+				case '6':
+					cout << "Укажите новый логин: ";
+					st = this->getLogin();
+					s->setLogin(st);
+					break;
+				case '0':
+					return;
+				default:
+					cout << "Ошибка! Нет такого пункта меню" << endl;
+					break;
+					break;
+				}
+			} while (true);
+
 			cout << "Хотите изменить данные другого пользователя?(д/н): ";
 			cin >> rpt; cin.ignore(2, '\n');
 		} while (rpt == 'д');
-		sLgn.saveUsersToFile();
-		
-	}
-	void DeleteUser(SystemLogin &sLgn) {
-		char rpt = 'н', ch;
-		do {
-			system("cls");
-			cout << "Удаление пользователя" << endl;
-			cout << "----------------------------------------\n";
-			cout << "Укажите логин пользователя для поиска: ";
-			string login = this->getLogin();
-			sLgn.deleteUser(login);
-			cout << "Хотите удалить другого пользователя?(д/н): ";
-			cin >> rpt; cin.ignore(2, '\n');
-		} while (rpt == 'д');
-		sLgn.saveUsersToFile();
 
-	}
+
+	}		
 
 	/*void loadUsersFromFile(ObjectFactory<SystemUser>* factory_) {
 		string login, role, name, lname, sname, address, phone;
@@ -277,28 +288,9 @@ public:
 	}*/
 
 
-private:
-	string getPassword() {
-		char p;
-		string st;
-		do {
-			p = _getch();
-			if (p != 13) {
-				st.push_back(p);
-				cout << '*';
-			}
-		} while (p != 13);
-		return st;
-	}
-	string getLogin() {
-		string lgn;
-		getline(cin, lgn);
-		for (int i = 0; i < lgn.size(); i++)
-			lgn[i] = tolower(lgn[i]);
-		return lgn;
-	}	
-		
-	IElementTS* createNewElement(ObjectFactory<IElementTS>* factory_, string creatorId){
+private:	
+
+	/*IElementTS* createNewElement(ObjectFactory<IElementTS>* factory_, string creatorId) {
 		string elname;
 		cout << "Укажите название: " << endl;
 		getline(cin, elname);
@@ -308,7 +300,7 @@ private:
 		catch (ObjectCreatorError err) {
 			cout << err.getError();
 		}
-		IElementTS* newEl = factory_->create(creatorId);
+		
 		newEl->setParam(elname);
 	}
 
@@ -325,7 +317,7 @@ private:
 	}
 	IElementTS* createNewQuestion(string testName) {
 		system("cls");
-		cout << "Формирование вопросов для теста "<<testName << endl;
+		cout << "Формирование вопросов для теста " << testName << endl;
 		cout << "-------------------------------------------------\n" << endl;
 		int qwNo; string qwText;
 		cout << "Номер вопроса: ";
@@ -333,7 +325,7 @@ private:
 		cout << "Текст вопроса:" << endl;
 		getline(cin, qwText);
 		IElementTS* newQw = new QuestionTS();
-		newQw->setParam(qwText, qwNo);	
+		newQw->setParam(qwText, qwNo);
 		char ch = 'н';
 		cout << "\nДобавьте варианты ответов к вопросу. Начинайте ответ со знака \"-\", если ответ некорректный, или с \"+ \" - в обратном случае. Например, \"-яблоко\" или \"+груша\"\n" << endl;
 		do {
@@ -345,7 +337,7 @@ private:
 		} while (ch == 'д');
 		return newQw;
 
-	}
-	
+	}*/
+
 
 };

@@ -145,6 +145,7 @@
     <ClInclude Include="CommandTS.h" />
     <ClInclude Include="ErrorTS.h" />
     <ClInclude Include="IElementTS.h" />
+    <ClInclude Include="InvokerTS.h" />
     <ClInclude Include="MyArrayList.h" />
     <ClInclude Include="StructureTS.h" />
     <ClInclude Include="SystemLogin.h" />

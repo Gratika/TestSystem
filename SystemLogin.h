@@ -11,14 +11,14 @@
 #include"ErrorTS.h"
 using namespace std;
 
-class SystemLogin {
+class SystemLoginTS {
 	map<string, long>pass;
 	vector <SystemUser*> users;
 	SystemUser* suser = nullptr;
-	ObjectFactory<SystemUser> *ufactory =nullptr;
-	
+	ObjectFactory<SystemUser>* ufactory = nullptr;
+
 public:
-	SystemLogin(){
+	SystemLoginTS() {
 		loadPasswordFromFile();
 		loadUsersFromFile();
 		ufactory = new ObjectFactory<SystemUser>();
@@ -30,9 +30,9 @@ public:
 		if (inp.is_open()) {
 			string l; long p;
 			while (!inp.eof()) {
-				inp >> l >> p;				
+				inp >> l >> p;
 				pass[l] = p;
-			}			
+			}
 			inp.close();
 		}
 	}
@@ -42,103 +42,89 @@ public:
 			out << i.first << " " << i.second << endl;
 		out.close();
 	}
-	void showMainMenu() {
-		showName();	
+	string showMainMenu() {
+		showName();
 		if (!userExist("admin")) this->createAdmin();
-		do {
-			system("cls");
-			char t;
-			cout <<"Главное меню системы"<< endl;
-			cout <<"---------------------\n"<< endl;
-			cout << "Выберите действие:\n1 - ВОЙТИ\n2 - ЗАРЕГИСТРИРОВАТЬСЯ\n0 - ВЫХОД" << endl;
-			cin >> t;
-			cin.ignore(32000, '\n');
-			switch (t)
-			{
-			case '1':
-				try {
-					this->userLogin();
-				}
-				catch (ErrorTS err) {
-					err.getError();
-				}				
-				
-				break;
-			case '2':
-				this->registerUser(false);
-				break;
-			case '0':
-				return;
-			default:
-				cout << "Ошибка! Нет такого пункта меню" << endl;
-				break;
-			}			
-		} while (true);
+		system("cls");
+		char t;
+		cout << "Главное меню системы" << endl;
+		cout << "---------------------\n" << endl;
+		cout << "Выберите действие:\n1 - ВОЙТИ\n2 - ЗАРЕГИСТРИРОВАТЬСЯ\n0 - ВЫХОД" << endl;
+		cin >> t;
+		cin.ignore(32000, '\n');
+		switch (t)
+		{
+		case '1':
+			return "userSingIn";
 
-	}
-	void userLogin(){
+		case '2':
+			return "userSingUp";
+		case '0':
+			return "exit";
+		default:
+			cout << "Ошибка! Нет такого пункта меню" << endl;
+			break;
+		}
+
+
+	}	
+
+	bool userLogin() {
 		system("cls");
 		cout << "Авторизация пользователя" << endl;
 		cout << "-------------------------------------\n" << endl;
-		string login, password;	
+		string login, password;
 		char p;
-		cout << "Логин: ";
-		login = getLogin();		
+		login = getLogin();
 		auto rec = pass.find(login);
-		if (rec != pass.end()) {
-			cout << "Пароль: ";
-			password = getPassword();
-			hash <string> h;
-			long hpass = h(password);
-			if (rec->second == hpass) {//ок, вход в систему, создать пользователя, показать его меню
-				this->createSystemUser(login);
-			}
-			else cout << "Ошибка авторизации! Неправильный пароль" << endl;
-		}
-		else cout << "Пользователь с таким логином не зарегистрирован в системе" << endl;
+		if (rec == pass.end())throw UserNotFindError("Пользователь с таким логином не зарегистрирован в системе");
+		cout << "Пароль: ";
+		password = getPassword();
+		hash <string> h;
+		long hpass = h(password);
+		if (rec->second != hpass) throw ObjectInfoNotFound("Ошибка авторизации! Неправильный пароль");
+		suser = this->findUser(login);
+		if (suser == nullptr)
+			throw ObjectInfoNotFound("Информация о пользователе отсутствует. Рекомендуется еще раз пройти регистрацию");
+		cout << "Вход в систему разрешен" << endl;
 		system("pause");
 	}
 	void registerUser(bool isAdmin) {
 		system("cls");
 		cout << "Регистрация нового пользователя" << endl;
 		cout << "-------------------------------------\n" << endl;
-		string login = "admin",role = "SystemAdmin", password,name, lname, sname, address, phone;		
-		cout << "Ваша фамилия: ";
+		string login = "admin", role = "SystemAdmin", password, name, lname, sname, address, phone;
+		cout << "Укажите фамилию: ";
 		getline(cin, sname);
-		cout << "Ваше имя: ";
+		cout << "Укажите имя: ";
 		getline(cin, name);
-		cout << "Ваше отчество: ";
+		cout << "Укажите отчество: ";
 		getline(cin, lname);
-		cout << "Домашний адрес: ";
+		cout << "Укажите домашний адрес: ";
 		getline(cin, address);
-		cout << "Телефон: ";
+		cout << "Укажите телефон: ";
 		getline(cin, phone);
 		if (!isAdmin) {
 			role = "SystemStudend";
-			bool flag=false;
-			cout << "Придумайте логин: ";
-			do {				
-				login= getLogin();
+			bool flag = false;
+			do {
+				login = getLogin();
 				flag = userExist(login);
 				if (flag) cout << "Логин занят. Повторите ввод: ";
-			} while (flag);			
+			} while (flag);
 		}
 		cout << "Придумайте пароль для входа в систему: ";
 		password = getPassword();
 		hash<string> h;
 		long hpass = h(password);
-		pass[login] = hpass;		
-		try {
-			SystemUser* newUser = ufactory->create(role);
-			newUser->setParam(login, role, sname, name, lname, address, phone);
-			users.push_back(newUser);
-			cout << "\nРегистрация успешна. Выполните вход в систему, чтобы начать работу\n" << endl;
-		}
-		catch (ObjectCreatorError err) { cout << err.getError(); }
-		
-		system("pause");
-
-
+		pass[login] = hpass;
+		SystemUser* newUser = ufactory->create(role);
+		newUser->setParam(login, role, sname, name, lname, address, phone);
+		users.push_back(newUser);
+		cout << "\nРегистрация успешна.\n" << endl;		
+	}
+	string showUserMenu() {
+		return suser->showMenu();
 	}
 	void showName() {
 		cout << "TESTING SYSTEM:" << endl;
@@ -152,7 +138,7 @@ public:
 		cout << "KK   KK  NN    NNN  OO    OO       WWW          WWW       LL       EE        DDD   DD  GG      GG  EE       " << endl;
 		cout << "KK    KK NN     NN    OOOO         WWW          WWW       LLLLLLLL EEEEEEEEE DDDDDD      GGGGGG    EEEEEEEEE" << endl;
 		cout << endl;
-		for (int i = 1; i <11; i++) {
+		for (int i = 1; i < 11; i++) {
 			cout << " .";
 			Sleep(1000);
 		}
@@ -163,7 +149,7 @@ public:
 		ifstream inp("Users.txt");
 		if (!inp.is_open()) throw FileError("Users.txt", "Не могу получить информацию о пользователях!");
 		inp >> cnt; inp.ignore(2, '\n');
-		for(int i=0; i<cnt; i++)
+		for (int i = 0; i < cnt; i++)
 		{
 			getline(inp, login);
 			getline(inp, role);
@@ -171,11 +157,11 @@ public:
 			getline(inp, name);
 			getline(inp, lname);
 			getline(inp, address);
-			getline(inp, phone);			
+			getline(inp, phone);
 			SystemUser* suser = ufactory->create(role);
 			suser->setParam(login, role, sname, name, lname, address, phone);
 			users.push_back(suser);
-		} 
+		}
 		inp.close();
 	}
 
@@ -200,14 +186,24 @@ public:
 		}
 		return nullptr;
 	}
-	void deleteUser(string lgn) {
-		bool flag = false;
-		int j = 0;
-		for (j < users.size(); j++ && !flag;) {
-			if (users[j]->getLogin() == lgn) flag = true;
-		}
-		if(!flag) cout << "Пользователь не найден" << endl;
-		else users.erase(users.begin()+j);
+	void deleteUser() {
+		char rpt = 'н', ch;
+		do {
+			system("cls");
+			cout << "Удаление пользователя" << endl;
+			cout << "----------------------------------------\n";
+			string login = this->getLogin();
+			bool flag = false;
+			int j = 0;
+			for (j < users.size(); j++ && !flag;) {
+				if (users[j]->getLogin() == login) flag = true;
+			}
+			if (!flag) cout << "Пользователь не найден" << endl;
+			else users.erase(users.begin() + j);
+			cout << "Хотите удалить другого пользователя?(д/н): ";
+			cin >> rpt; cin.ignore(2, '\n');
+		} while (rpt == 'д');
+
 	}
 
 	void createAdmin() {
@@ -229,6 +225,7 @@ public:
 		return st;
 	}
 	string getLogin() {
+		cout << "Укажите логин пользователя: ";
 		string lgn;
 		getline(cin, lgn);
 		for (int i = 0; i < lgn.size(); i++)
@@ -241,17 +238,12 @@ public:
 		if (rec != pass.end()) return true;
 		else return false;
 	}
-	
-	void createSystemUser(string ulogin) {
-		suser = this->findUser(ulogin);
-		if (suser == nullptr)
-			cout << "Информация о пользователе отсутствует. Рекомендуется еще раз пройти регистрацию" << endl;
-		else suser->showMenu();
-	}
+
+
 	ObjectFactory<SystemUser>* getUserFactory() { return this->ufactory; }
 	SystemUser* getSystemUser() { return this->suser; }
-	
-	~SystemLogin() {
+
+	~SystemLoginTS() {
 		this->savePasswordToFile();
 		this->saveUsersToFile();
 		if (suser != nullptr) delete suser;

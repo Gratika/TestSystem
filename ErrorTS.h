@@ -41,3 +41,9 @@ public:
 	~OutOfRangeError(){}
 };
 
+class UserNotFindError :public ErrorTS {
+public:
+	UserNotFindError(string msg) :ErrorTS(msg) {}
+	~UserNotFindError() {}
+};
+
