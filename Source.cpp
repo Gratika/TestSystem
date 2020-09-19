@@ -22,7 +22,7 @@ int main() {
 	out << "TestTS" << endl;
 	out << "Сложение и вычитание чисел" << endl;	
 	out.close();*/
-	shared_ptr<InvokerTS<StructureTS, SystemLoginTS>>invoker_ = make_shared <InvokerTS<StructureTS, SystemLoginTS>>(new StructureTS(), new SystemLoginTS());
+	shared_ptr<InvokerTS>invoker_ = make_shared <InvokerTS>(new StructureTS(), new SystemLoginTS());
 	//InvokerTS<StructureTS, SystemLoginTS> *invoker_ = new InvokerTS<StructureTS, SystemLoginTS>(new StructureTS(), new SystemLoginTS())
 	invoker_->mainScript();
 }

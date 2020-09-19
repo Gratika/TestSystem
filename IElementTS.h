@@ -13,30 +13,36 @@ class IElementTS {
 protected:
 	string name;
 	string elType;
-	IElementTS* parent=nullptr;
+	IElementTS* parent = nullptr;
+	int level = 0;
 public:
 	IElementTS() {}
 	void setParent(IElementTS* p) { this->parent = p; }
 	IElementTS* getParent() { return this->parent; }
 	virtual string getName() { return this->name; }
 	string getType() { return this->elType; }
-	virtual int getSize() = 0;
+	virtual int getSize() { return 0; };
+	virtual int getCost() { return 0; }
+	virtual void setLevel(int lvl) { this->level = lvl; }
+	virtual int getLevel() { return this->level; }
 	virtual bool isComposite() { return false; }
 	virtual void setParam(string name, int No = 0) {
-		this->name = name;		
+		this->name = name;
 	}
-	virtual void loadFromFile(ObjectFactory<IElementTS> *&f) {}
-	virtual void saveToFile(){}	
-	virtual void add(IElementTS* elem){}
-	virtual void remove(int id){}	
+	virtual void loadFromFile(ObjectFactory<IElementTS>*& f) {}
+	virtual void saveToFile() {}
+	virtual void add(IElementTS* elem) {}
+	virtual void remove(int id) {}
 	virtual void print() {
-		cout << name << endl;
+		if (this->parent != nullptr) cout << name << endl;
 	}
-	virtual IElementTS* getElement(int id) = 0;
 	virtual void show() {
 		this->print();
+		//if (this->parent != nullptr) cout << name << endl; 
 	}
-	virtual ~IElementTS()=0 {}
+	virtual IElementTS* getElement(int id) = 0;
+
+	virtual ~IElementTS() = 0 {}
 protected:
 	string getFilename() {
 		return this->name + ".txt";
@@ -57,33 +63,34 @@ class ConteinerTS :public IElementTS {
 protected:
 	vector<IElementTS*> elements;
 public:
-	ConteinerTS() {}	
-	
+	ConteinerTS() {}
+
 	void add(IElementTS* elem) override {
 		this->elements.push_back(elem);
 		elem->setParent(this);
+		elem->setLevel(this->getLevel() + 1);
 	}
-	
+
 	/*virtual void print() override {
 		int id = 1;
 		cout << this->name << endl;
 		for (auto i : elements) {
-			cout << id << " ";
+			cout << setw(this->getLevel()*5) << id << " ";
 			i->print();
 			id++;
 		}
-			
+
 	}*/
-	virtual void show() override {		
+	virtual void show() override {
 		for (int i = 0; i < this->elements.size(); i++) {
-			cout << i+1 << " ";
-			this->elements[i]->print();			
+			cout << i + 1 << " ";
+			this->elements[i]->print();
 		}
 
 	}
-	
+
 	void remove(int id) override {
-		this->elements.erase(elements.begin()+id);
+		this->elements.erase(elements.begin() + id);
 	}
 
 	int getSize()override {
@@ -117,7 +124,7 @@ public:
 			inp.close();
 		}
 		for (IElementTS* el : this->elements) {
-			el->loadFromFile(f);
+			if (el->getType() == "TestCategoryTS")el->loadFromFile(f);
 		}
 	}
 
@@ -130,9 +137,9 @@ public:
 			out << i->getName() << endl;
 		}
 		out.close();
-		for (IElementTS* el : this->elements) {
-			el->saveToFile();
-		}
+		/*	for (IElementTS* el : this->elements) {
+				el->saveToFile();
+			}*/
 	}
 	virtual ~ConteinerTS() {
 		this->elements.~vector();
@@ -140,43 +147,12 @@ public:
 
 };
 
-class TestCategoryTS: public ConteinerTS {
+class TestCategoryTS : public ConteinerTS {
 public:
-	TestCategoryTS(){
+	TestCategoryTS() {
 		this->elType = "TestCategoryTS";
 	}
-	
-	/*void loadFromFile(ObjectFactory<IElementTS> *&f)override {
-		string fileName = this->getFilename() ,elName, elType;
-		ifstream inp(fileName);
-		if (inp.is_open()) {
-			int cnt;
-			inp >> cnt; inp.ignore(2,'\n');
-			for (int i = 0; i < cnt; i++) {
-				getline(inp, elType);
-				getline(inp, elName);
-				try {
-					IElementTS* elem = f->create(elType);
-					elem->setParam(elName);
-					this->add(elem);
-				}
-				catch (ObjectCreatorError err) {
-					cout << err.getError();
-				}							
-			}			
-			inp.close();
-		}
-	}*/
-	/*void saveToFile()override {
-		string fileName = this->getFilename();
-		ofstream out(fileName);
-		out << this -> getSize()<<endl;
-		for (auto i : this->elements) {
-			out << i->getType() << endl;
-			out << i->getName() << endl;			
-		}
-		out.close();
-	}*/
+
 };
 
 class TestTS : public ConteinerTS {
@@ -185,98 +161,105 @@ public:
 		this->elType = "TestTS";
 	}
 
-	void loadFromFile(ObjectFactory<IElementTS> *&f)override {
+	void loadFromFile(ObjectFactory<IElementTS>*& f)override {
 		string fileName = this->getFilename(), elName, elType;
-		int cntAnsw;
+		int cntAnsw, cntQw, elCost;
 		ifstream inp(fileName);
-		if (inp.is_open()) {
-			while (!inp.eof()) {
+		if (!inp.is_open()) throw FileError(fileName, "Похоже теста больше нет!");
+
+		inp >> cntQw; inp.ignore(2, '\n');
+		for (int j = 0; j < cntQw; j++) {
+			getline(inp, elType);
+			inp >> elCost; inp.ignore(2, '\n');
+			getline(inp, elName);
+			IElementTS* qw = f->create(elType);
+			qw->setParam(elName, elCost);
+			inp >> cntAnsw; inp.ignore(2, '\n');
+			for (int i = 0; i < cntAnsw; i++) {
 				getline(inp, elType);
-				getline(inp, elName);				
-				IElementTS* qw = f->create(elType);
-				qw->setParam(elName);
-				inp >> cntAnsw; inp.ignore('\n');
-				for (int i = 0; i < cntAnsw; i++) {
-					getline(inp, elType);
-					getline(inp, elName);
-					IElementTS* answ = f->create(elType);
-					answ->setParam(elName);
-					qw->add(answ);
-				}
-				this->add(qw);
+				getline(inp, elName);
+				IElementTS* answ = f->create(elType);
+				answ->setParam(elName);
+				qw->add(answ);
 			}
-			inp.close();
+			this->add(qw);
 		}
+		inp.close();
+
 	}
 	void saveToFile()override {
 		string fileName = this->getFilename();
 		ofstream out(fileName);
+		out << elements.size() << endl;
 		for (auto i : this->elements) {
 			out << i->getType() << endl;
+			out << i->getCost() << endl;
 			out << i->getName() << endl;
-			out << i->getSize() << endl;			
+			out << i->getSize() << endl;
 			for (int j = 0; j < i->getSize(); j++) {
 				IElementTS* answ = i->getElement(j);
 				out << answ->getType() << endl;
 				out << answ->getName() << endl;
-			}			
+			}
 		}
 		out.close();
 	}
 	void print()override {
-		cout << name <<" (тест)"<< endl;
+		cout << name << " (тест)" << endl;
 	}
-
-	/*void show()override {
-		this->loadFromFile();
-	}*/
 };
 
 class QuestionTS : public ConteinerTS {
-private: int number;
+private: int costQw;
 public:
 	QuestionTS() {
 		this->elType = "QuestionTS";
 	}
-	void setParam(string name, int No=0)override {
+	void setParam(string name, int cost_ = 0)override {
 		IElementTS::setParam(name);
-		this->number = No;
+		this->costQw = cost_;
 	}
-	void print()override{
-		cout << number << " " << this->name;
+	int getCost()override {
+		return this->costQw;
+	}
+	void print()override {
+		//cout << this->name << endl;		
+		int id = 1;
+		cout << this->name << endl;
+		for (auto i : elements) {
+			cout << setw(this->getLevel() * 2) << id << " ";
+			i->print();
+			id++;
+		}
 	}
 	/*void show()override {
-		
-		for (IElementTS* el : this->elements) {
-			el->show();
-		}
+
 	}*/
 };
 
 class AnswerTS : public Leaf {
 	bool isCorect = false;
-    int number;
 public:
-	AnswerTS(){
+	AnswerTS() {
 		this->elType = "AnswerTS";
 	}
 	void setParam(string name, int No = 0)override {
 		char c = name[0];
 		if (c == '+') this->isCorect = true;
-		name.erase(0);
+		if (c == '+' || c == '-') name.erase(0, 1);
 		IElementTS::setParam(name);
-		this->number = No;
 
 	}
 	string getName()override {
-		if (this->isCorect)	return "+" + this->name;
-		else return "-" + this->name;
+		if (this->isCorect)	return ("+" + this->name);
+		else return ("-" + this->name);
 	}
-	void print()override {
-		cout << number << " " << this->name;
-	}
+	/*void print()override{}
+	void show()override {
+		cout << this->name;
+	}*/
 
-	
+
 };
 
 

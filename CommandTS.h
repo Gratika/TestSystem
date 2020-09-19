@@ -2,12 +2,12 @@
 #include "SystemUser.h"
 #include"SystemLogin.h"
 #include "StructureTS.h"
-template<class... Types>
+template<class T>
 class CommandTS {
 protected:
-	Types* reseiver_;
+	T *reseiver_;
 public:
-	CommandTS<Types>(T* rsvr):reseiver_(rsvr){}
+	CommandTS<T>(T  *rsvr):reseiver_(rsvr){}
 	virtual void execute() = 0;
 	~CommandTS(){}
 };
@@ -73,6 +73,22 @@ public:
 	}
 };
 
+class ShowStructure :public CommandTS<StructureTS> {
+public:
+	ShowStructure(StructureTS* strcTS) :CommandTS<StructureTS>(strcTS) {}
+	void execute()override {
+		reseiver_->showSrtucture();
+	}
+};
+
+class ShowTest :public CommandTS<StructureTS> {
+public:
+	ShowTest(StructureTS* strcTS) :CommandTS<StructureTS>(strcTS) {}
+	void execute()override {
+		reseiver_->showTest();
+	}
+};
+
 class AdminEditUser :public CommandTS<SystemLoginTS> {	
 public:
 	AdminEditUser(SystemLoginTS *sLgn) :CommandTS<SystemLoginTS>(sLgn){}
@@ -103,10 +119,17 @@ public:
 
 	}
 };
+class ShowAllUser :public CommandTS<SystemLoginTS> {
+public:
+	ShowAllUser(SystemLoginTS* sLgn) :CommandTS<SystemLoginTS>(sLgn) {}
+	void execute()override {
+		reseiver_->showAllUser();
+	}
+};
 class ExitTS :public CommandTS<SystemLoginTS> {
 public:
 	ExitTS(SystemLoginTS* sLgn) :CommandTS<SystemLoginTS>(sLgn) {}
 	void execute()override {
-		exit;
+		exit(0);
 	}
 };

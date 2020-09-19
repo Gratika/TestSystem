@@ -19,11 +19,11 @@ class SystemLoginTS {
 
 public:
 	SystemLoginTS() {
-		loadPasswordFromFile();
-		loadUsersFromFile();
+		loadPasswordFromFile();		
 		ufactory = new ObjectFactory<SystemUser>();
 		ufactory->add("SystemStudend", new ObjectCreator< SystemStudend, SystemUser>);
 		ufactory->add("SystemAdmin", new ObjectCreator<SystemAdmin, SystemUser>);
+		loadUsersFromFile();
 	}
 	void loadPasswordFromFile() {
 		ifstream inp("Login.txt");
@@ -47,25 +47,25 @@ public:
 		if (!userExist("admin")) this->createAdmin();
 		system("cls");
 		char t;
-		cout << "Главное меню системы" << endl;
-		cout << "---------------------\n" << endl;
-		cout << "Выберите действие:\n1 - ВОЙТИ\n2 - ЗАРЕГИСТРИРОВАТЬСЯ\n0 - ВЫХОД" << endl;
-		cin >> t;
-		cin.ignore(32000, '\n');
-		switch (t)
-		{
-		case '1':
-			return "userSingIn";
-
-		case '2':
-			return "userSingUp";
-		case '0':
-			return "exit";
-		default:
-			cout << "Ошибка! Нет такого пункта меню" << endl;
-			break;
-		}
-
+		do {
+			cout << "Главное меню системы" << endl;
+			cout << "---------------------\n" << endl;
+			cout << "Выберите действие:\n1 - ВОЙТИ\n2 - ЗАРЕГИСТРИРОВАТЬСЯ\n0 - ВЫХОД" << endl;
+			cin >> t;
+			cin.ignore(32000, '\n');
+			switch (t)
+			{
+			case '1':
+				return "userLogin";
+			case '2':
+				return "userSingUp";
+			case '0':
+				return "exit";
+			default:
+				cout << "Ошибка! Нет такого пункта меню" << endl;
+				break;
+			}
+		} while (t < '0' || t > '3');
 
 	}	
 
@@ -86,7 +86,7 @@ public:
 		suser = this->findUser(login);
 		if (suser == nullptr)
 			throw ObjectInfoNotFound("Информация о пользователе отсутствует. Рекомендуется еще раз пройти регистрацию");
-		cout << "Вход в систему разрешен" << endl;
+		cout << "\nВход в систему разрешен" << endl;
 		system("pause");
 	}
 	void registerUser(bool isAdmin) {
@@ -118,10 +118,13 @@ public:
 		hash<string> h;
 		long hpass = h(password);
 		pass[login] = hpass;
+		this->savePasswordToFile();
 		SystemUser* newUser = ufactory->create(role);
 		newUser->setParam(login, role, sname, name, lname, address, phone);
 		users.push_back(newUser);
-		cout << "\nРегистрация успешна.\n" << endl;		
+		this->saveUsersToFile();
+		cout << "\nРегистрация успешна.\n" << endl;	
+		system("pause");
 	}
 	string showUserMenu() {
 		return suser->showMenu();
@@ -167,7 +170,7 @@ public:
 
 	void saveUsersToFile() {
 		ofstream out("Users.txt");
-		out << users.size();
+		out << users.size()<<endl;
 		for (auto s : users) {
 			out << s->getLogin() << endl;
 			out << s->getRole() << endl;
@@ -179,7 +182,14 @@ public:
 		}
 		out.close();
 	}
-
+	void showAllUser() {
+		system("cls");
+		cout << "Пользователи системы" << endl;
+		cout << "----------------------------------------\n";
+		for (auto s : users)
+			s->print();
+		system("pause");
+	}
 	SystemUser* findUser(string login) {
 		for (auto s : users) {
 			if (s->getLogin() == login) return s;
@@ -217,7 +227,7 @@ public:
 		string st;
 		do {
 			p = _getch();
-			if (p != 13) {
+			if (p != 13 && p != 8) {
 				st.push_back(p);
 				cout << '*';
 			}
