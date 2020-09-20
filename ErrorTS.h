@@ -47,3 +47,9 @@ public:
 	~UserNotFindError() {}
 };
 
+class StatisticsError :public ErrorTS {
+public:
+	StatisticsError(string msg) :ErrorTS(msg) {}
+	~StatisticsError() {}
+};
+

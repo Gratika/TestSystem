@@ -89,6 +89,32 @@ public:
 	}
 };
 
+class GetTest :public CommandTS<StructureTS> {
+	IElementTS* test_ = nullptr;
+public:
+	GetTest(StructureTS* strcTS) :CommandTS<StructureTS>(strcTS) {}
+	void execute()override {
+		test_=reseiver_->getTest();
+	}
+	IElementTS* getTest() { return this->test_; }
+
+};
+
+class BeginTest :public CommandTS<StructureTS> {
+	IElementTS* test_ = nullptr;
+public:
+	BeginTest(StructureTS* strcTS) :CommandTS<StructureTS>(strcTS) {}
+	void execute()override {
+		system("cls");
+		cout << "Процесс тестирования" << endl;
+		cout << "-------------------------------------\n" << endl;
+		reseiver_->beginTesting();
+	}
+	void setTest(IElementTS* test_) {this->test_=test_; }
+
+};
+
+
 class AdminEditUser :public CommandTS<SystemLoginTS> {	
 public:
 	AdminEditUser(SystemLoginTS *sLgn) :CommandTS<SystemLoginTS>(sLgn){}

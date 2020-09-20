@@ -6,12 +6,14 @@
 #include <vector>
 #include "ObjectFactory.h"
 #include"IElementTS.h"
+#include"StatisticsElem.h"
 //#include<iomanip>
 using namespace std;
 class StructureTS {
 	ObjectFactory<IElementTS>* efactory = nullptr;
 	IElementTS* rootCategory = nullptr;
 public:
+	//конструктор. Создается фабрика для генерации элементов и корневая категория
 	StructureTS() {
 		efactory = new ObjectFactory<IElementTS>();
 		efactory->add("TestCategoryTS", new ObjectCreator< TestCategoryTS, IElementTS>);
@@ -33,77 +35,191 @@ public:
 	void saveToFile() {
 		rootCategory->saveToFile();
 	}
-
+	//Создание новой категории (с выбором категории размещения)
 	void createCategory() {
 		system("cls");
 		cout << "Создание новой категории" << endl;
 		cout << "-------------------------------------\n" << endl;
 		string creatorId = "TestCategoryTS";
-		IElementTS* newElem = this->createNewElement(creatorId);
-		//cout << "В какую категорию поместить: " << endl;
-		IElementTS* category_ = this->getCategory();
-		category_->add(newElem);
-		category_->saveToFile();
-		cout << "Операция успешна" << endl;
+		IElementTS* newElem = nullptr;
+		try {
+			newElem = this->createNewElement(creatorId);
+			//cout << "В какую категорию поместить: " << endl;
+			IElementTS* category_ = this->getCategory();
+			if (category_->getType() != "TestCategoryTS")
+				cout << "Ваш выбор не является категорией" << endl;
+			else {
+				category_->add(newElem);
+				category_->saveToFile();
+				cout << "Операция успешна" << endl;
+			}
+		}
+		catch (ErrorTS err) {
+			cout << err.getError() << endl;
+			if (newElem != nullptr) delete newElem;
+		}
 		system("pause");
 	}
-
+	//Создание теста (с выбором категории размещения)
 	void createTest() {
 		system("cls");
 		cout << "Создание нового теста" << endl;
 		cout << "-------------------------------------\n" << endl;
 		string creatorId = "TestTS";
-		IElementTS* newElem = this->createNewElement(creatorId);
-		//cout << "В какую категорию поместить: " << endl;
-		IElementTS* category_ = this->getCategory();
-		category_->add(newElem);
-		category_->saveToFile();
-		char ch = 'н';
-		do {
-			IElementTS* question_ = this->createNewQuestion(newElem->getName());
-			newElem->add(question_);
-			cout << "-------------------------------------" << endl;
-			cout << "Добавить еще один вопрос к тесту?(д/н) ";
-			cin >> ch;
-			cin.ignore(2, '\n');
-		} while (ch == 'д');
-		newElem->saveToFile();
-		cout << "Операция успешна" << endl;
+		IElementTS* newElem = nullptr;
+		try {
+			newElem = this->createNewElement(creatorId);
+			//cout << "В какую категорию поместить: " << endl;
+			IElementTS* category_ = this->getCategory();
+			if (category_->getType() != "TestCategoryTS")
+				cout << "Ваш выбор не является категорией" << endl;
+			else {
+				category_->add(newElem);
+				category_->saveToFile();
+				char ch = 'н';
+				do {
+					IElementTS* question_ = this->createNewQuestion(newElem->getName());
+					newElem->add(question_);
+					cout << "-------------------------------------" << endl;
+					cout << "Добавить еще один вопрос к тесту?(д/н) ";
+					cin >> ch;
+					cin.ignore(2, '\n');
+				} while (ch == 'д');
+				newElem->saveToFile();
+				cout << "Операция успешна" << endl;
+			}
+		}
+		catch (ErrorTS err) {
+			cout << "Ошибка! " << err.getError() << endl;
+			if (newElem != nullptr) delete newElem;
+		}
+
 		system("pause");
 	}
+
+	/*Выбор и загрузка теста из файла
+	return IElementTS* (загруженный тест)*/
+	IElementTS* getTest() {
+		IElementTS* test_ = this->getCategory();
+		if (test_->getType() != "TestTS") throw ObjectInfoNotFound("Выбранный Вами элемент не является тестом");
+		test_->loadFromFile(efactory);
+		return test_;
+	}
+	
+	//Процес тестирования
+	StatisticsElem* beginTesting(IElementTS* test_, StatisticsElem *stEl) {
+		int beginNo = 0; int id = 0;
+		if (stEl != nullptr && !stEl->isFinished()) {
+			cout << "Вы остановились на вопросе №" << stEl->getNoLast() << ". Продолжить проходжение теста(д) или начать сначала(н)?" << endl;
+			char ch;
+			cin >> ch;
+			cin.ignore(3200, '\n');
+			if (ch == 'д') beginNo = stEl->getNoLast() + 1;
+			else {
+				id = stEl->getId();
+				stEl = nullptr;
+			}
+		}
+		StatisticsElem* rezTest = doTesting(test_, beginNo);
+		if (stEl == nullptr) {
+			if (id != 0) rezTest->setId(id);
+			return rezTest;		
+		}
+		else {
+			if (stEl->isFinished()) {
+				
+				if (rezTest->getGetingMark() > stEl->getGetingMark()) return rezTest;
+				else return stEl;
+			}
+			else {
+				return (stEl->operator+( rezTest));
+			}
+		}
+
+		
+	}
+	StatisticsElem* doTesting(IElementTS* test_, int beginNo) {
+		
+		double getMark = 0, maxMark=test_->getMaxCost();//переменные для статистики
+		int cntCrtQw = 0, cntIncrtQw = 0, cntMsnQw = 0, NoQw; 		
+		for ( NoQw= beginNo; NoQw < test_->getSize(); NoQw++) { //перебираем вопросы теста
+			system("cls");
+			cout << "Тест \"" << test_->getName() << "\" (кол-во вопросов: " << test_->getSize() << ")" << endl;
+			cout << "--------------------------------------------------------\n" << endl;
+			IElementTS* qw = test_->getElement[NoQw]; //получаю вопрос по номеру
+			int costQw = qw->getCost();//стоимость вопроса
+			double tmpCostQw = 0;//стоимость ответа, которую получил пользователь
+			cout << "Вопрос №\n" << NoQw +1<<"вес вопроса ("<<costQw<<")"<< endl;
+			qw->print();
+			int costAnsw = getCostAnswer(qw);//стоимость ответа(на случай нескольких правильных ответов)
+			char ch = 'н';
+			do {
+				int NoAnsw; 
+				cout << "Укажите правильный, на ваш взгляд, вариант ответа(0 - пропустить вопрос):";
+				do {
+					NoAnsw = getValue();
+					if (NoAnsw < 0 || NoAnsw >= qw->getSize())
+						cout << "Ошибочный ввод. Еще попытка: ";
+				} while (NoAnsw < 0 || NoAnsw >= qw->getSize());
+				
+				if (NoAnsw != 0) {//если пользователь не пропускает вопрос
+					if ((qw->getElement(NoAnsw - 1))->getCorrect())
+						tmpCostQw += costAnsw;//считаем полученую стоимость
+					cout << "Может есть еще правильные ответы?(д/н): ";
+					cin >> ch;
+				}
+				else cntMsnQw++;//иначе - увеличиваем число пропущенных вопросов
+
+			} while (ch == 'д');
+			getMark += costAnsw;//прибавляем полученную стоимость к общему значению
+			//определяем, куда отнести вопрос: правильно отвеченым или нет
+			if (round(tmpCostQw) == costAnsw)cntCrtQw++;
+			else cntIncrtQw++;			
+		}
+		StatisticsElem* newStEl = new StatisticsElem((test_->getParent())->getName(), test_->getName(), test_->getSize, maxMark, getMark, cntCrtQw, cntIncrtQw, cntIncrtQw, NoQw);
+		return newStEl;
+	}
+	
+	double getCostAnswer(IElementTS* question) {
+		int cntCrtQw = 0, costQw = question->getCost();
+		double costAnsw = 0;
+		for (int i = 0; i < question->getSize(); i++)
+			if ((question->getElement(i))->getCorrect())cntCrtQw++;
+		if (cntCrtQw != 0)costAnsw = (double)(costQw / cntCrtQw);
+		return costAnsw;
+	}
+
+	//Просмотр выбраного теста
 	void showTest() {
 		system("cls");
 		cout << "Просмотр содержимого теста" << endl;
 		cout << "-------------------------------------\n" << endl;
-		IElementTS* test_ = this->getCategory();
-		if (test_->getType() != "TestTS")
-			cout << "Выбранный Вами элемент не является тестом" << endl;
-		else {
-			try {
-				test_->loadFromFile(efactory);
-				cout << "-------------------------------------------\n" << endl;
-				cout << "Тест \"" << test_->getName() << "\"" << endl;
-				test_->show();
-				char actn = 'н';
-				cout << "Хотите внести изменения в тест?(д/н): ";
-				cin >> actn; 
-				cin.ignore(2, '\n');
-				if (actn == 'д') {
-					editTest(test_);
-					test_->saveToFile();
-					//system("pause");
-					//test clear
-				}
+		try {
+			IElementTS* test_ = this->getTest();
+			cout << "-------------------------------------------\n" << endl;
+			cout << "Тест \"" << test_->getName() << "\"" << endl;
+			test_->show();
+			char actn = 'н';
+			cout << "Хотите внести изменения в тест?(д/н): ";
+			cin >> actn;
+			cin.ignore(2, '\n');
+			if (actn == 'д') {
+				editTest(test_);
+				test_->saveToFile();
+				//system("pause");
+				//test clear
 			}
-			catch (ErrorTS err) { 
-				cout << err.getError() << endl; 
-			}
+		}
+		catch (ErrorTS err) {
+			cout << "Ошибка! " << err.getError() << endl;
 		}
 		system("pause");
 	}
+
+	//Редактирование конкретного теста
 	void editTest(IElementTS* test_) {
 		system("cls");
-		cout << "Редактирование теста " <<"\""<< test_->getName() << "\"" << endl;
+		cout << "Редактирование теста " << "\"" << test_->getName() << "\"" << endl;
 		cout << "-------------------------------------\n" << endl;
 		char actn = 'н';
 		do {
@@ -111,7 +227,7 @@ public:
 			cout << "Что будем делать?\n1-Добавить вопрос;\n2-Изменить вопрос\n3-Удалить вопрос" << endl;
 			cin >> ch; cin.ignore(32000, '\n');
 			int No;
-			IElementTS* newQw = nullptr, *elQw = nullptr;
+			IElementTS* newQw = nullptr, * elQw = nullptr;
 			switch (ch)
 			{
 			case '1':
@@ -130,7 +246,10 @@ public:
 			case '3':
 				cout << "Укажите номер вопроса: ";
 				No = getValue();
-				test_->remove(No - 1);
+				try {
+					test_->remove(No - 1);
+				}
+				catch (ErrorTS err) { cout << err.getError() << endl; }
 				break;
 			default:
 				cout << "Ошибочный ввод..." << endl;
@@ -148,6 +267,8 @@ public:
 		IElementTS* delElem = this->getCategory();
 	}
 
+	/*Выбор элемента структуры(категории или теста) для дальнейших действий с ним
+	return IElementTS* (выбранный элемент)*/
 	IElementTS* getCategory() {
 		IElementTS* elm = rootCategory;
 		int ch;
@@ -157,35 +278,28 @@ public:
 			cout << "0 Текущая категория (" << elm->getName() << ");" << endl;
 			elm->show();
 			ch = getValue();
-			if (ch != 0)
-				try { elm = elm->getElement(ch - 1); }
-			catch (OutOfRangeError err) {
-				cout << "Ошибка! " << err.getError() << endl;
-			}
-
+			if (ch != 0) elm = elm->getElement(ch - 1);
 		} while (ch != 0 && elm->getType() != "TestTS");
 		return elm;
 	}
-
+	/*создать новый элемент структуры(категорию или тест)
+	return IElementTS* (созданный элемент)*/
 	IElementTS* createNewElement(string creatorId) {
 		cout << "Для добавления нового структурного элемента сначала необходимо дать ему имя, а потом указать место его расположения (категорию)" << endl;
 		system("pause");
 		string elname;
 		cout << "Укажите название: " << endl;
 		getline(cin, elname);
-		try {
-			IElementTS* newEl = efactory->create(creatorId);
-			newEl->setParam(elname);
-			return newEl;
-		}
-		catch (ObjectCreatorError err) {
-			cout << err.getError();
-		}
-
+		IElementTS* newEl = efactory->create(creatorId);
+		newEl->setParam(elname);
+		return newEl;
 	}
 
+
+	/*создать новый ответ
+	return IElementTS* (созданный ответ)*/
 	IElementTS* createNewAnswer() {
-		int answerNo; string answText;
+		string answText;
 		cout << "Сформируйте ответ: ";
 		getline(cin, answText);
 		IElementTS* newAnsw = new AnswerTS();
@@ -193,6 +307,9 @@ public:
 		return newAnsw;
 
 	}
+
+	/*создать новый вопрос
+	return IElementTS* (созданный вопрос)*/
 	IElementTS* createNewQuestion(string testName) {
 		system("cls");
 		cout << "Формирование вопросов для теста " << testName << endl;
@@ -216,6 +333,7 @@ public:
 		return newQw;
 
 	}
+	//редактирование конкретного вопроса(меню действий)
 	void editQuestion(IElementTS* el) {
 		system("cls");
 		cout << "Редактирование вопроса:" << endl;
@@ -243,22 +361,25 @@ public:
 				cout << "Ошибочный ввод..." << endl;
 				break;
 			}
-			cout << "Хотите еще что-то изменить в вопросе: \""<<el->getName()<<"\"?(д/н)";
+			cout << "Хотите еще что-то изменить в вопросе: \"" << el->getName() << "\"?(д/н)";
 			cin >> actn; cin.ignore(32000, '\n');
 		} while (actn == 'д');
 	}
+	//редактирование формулировки конкретного вопроса
 	void editTextQw(IElementTS* el) {
 		string newName;
 		cout << "Заменить " << el->getName() << " на: ";
 		getline(cin, newName);
 		el->setParam(newName, el->getCost());
 	}
+	//редактирование стоимости конкретного вопроса 
 	void editCostQw(IElementTS* el) {
 		int newCost;
 		cout << "Заменить " << el->getCost() << " на: ";
 		newCost = getValue();
 		el->setParam(el->getName(), newCost);
 	}
+	//редактирование ответов (варианты выбора действий и их реализация)
 	void editAnswer(IElementTS* el) {
 		system("cls");
 		cout << "Редактирование ответов на вопрос:" << endl;
@@ -266,7 +387,7 @@ public:
 		el->print();
 		cout << "---------------------------------\n" << endl;
 		char actn = 'н', ch;
-		IElementTS* answEl = nullptr, *newAnsw = nullptr;
+		IElementTS* answEl = nullptr, * newAnsw = nullptr;
 		do {
 			cout << "Что будем делать?\n1-изменять ответы; \n2-добавлять ответы" << endl;
 			cin >> ch; cin.ignore(32000, '\n');
@@ -296,6 +417,7 @@ public:
 			cin >> actn; cin.ignore(32000, '\n');
 		} while (actn == 'д');
 	}
+	//редактирование конкретного ответа в вопросе
 	void editTextAnsw(IElementTS* answEl) {
 		system("cls");
 		string name = answEl->getName(), isCorrect;
@@ -321,7 +443,9 @@ public:
 		name = c + name;
 		answEl->setParam(name);
 	}
+
 private:
+	//Для считывания числовых значений из консоли
 	double getValue() {
 		double a;
 		while (true) {

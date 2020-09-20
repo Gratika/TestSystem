@@ -23,6 +23,8 @@ public:
 	string getType() { return this->elType; }
 	virtual int getSize() { return 0; };
 	virtual int getCost() { return 0; }
+	virtual bool getCorrect(){ return false; }
+	virtual double getMaxCost(){ return 0; }
 	virtual void setLevel(int lvl) { this->level = lvl; }
 	virtual int getLevel() { return this->level; }
 	virtual bool isComposite() { return false; }
@@ -70,6 +72,11 @@ public:
 		elem->setParent(this);
 		elem->setLevel(this->getLevel() + 1);
 	}
+	double getMaxCost()override {
+		double s = 0;
+		for (auto el : elements)
+			s += el->getCost();
+	}
 
 	/*virtual void print() override {
 		int id = 1;
@@ -90,6 +97,7 @@ public:
 	}
 
 	void remove(int id) override {
+		if (id<0 || id>this->elements.size()) throw OutOfRangeError("¬ыход за пределы допустимого диапазона");
 		this->elements.erase(elements.begin() + id);
 	}
 
@@ -227,7 +235,7 @@ public:
 		int id = 1;
 		cout << this->name << endl;
 		for (auto i : elements) {
-			cout << setw(this->getLevel() * 2) << id << " ";
+			cout << setw((this->getLevel()) * 2) << id << " ";
 			i->print();
 			id++;
 		}
@@ -253,6 +261,9 @@ public:
 	string getName()override {
 		if (this->isCorect)	return ("+" + this->name);
 		else return ("-" + this->name);
+	}
+	bool getCorrect() override {
+		return this->isCorect;
 	}
 	/*void print()override{}
 	void show()override {
