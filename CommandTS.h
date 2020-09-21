@@ -2,6 +2,8 @@
 #include "SystemUser.h"
 #include"SystemLogin.h"
 #include "StructureTS.h"
+#include "StatisticsTS.h"
+#include "StatisticsElem.h"
 template<class T>
 class CommandTS {
 protected:
@@ -90,30 +92,134 @@ public:
 };
 
 class GetTest :public CommandTS<StructureTS> {
-	IElementTS* test_ = nullptr;
+	IElementTS* fTest_ = nullptr;
 public:
 	GetTest(StructureTS* strcTS) :CommandTS<StructureTS>(strcTS) {}
 	void execute()override {
-		test_=reseiver_->getTest();
+		fTest_=reseiver_->getTest();
 	}
-	IElementTS* getTest() { return this->test_; }
+	IElementTS* getFindTest() { return this->fTest_; }
 
 };
 
-class BeginTest :public CommandTS<StructureTS> {
+class BeginTest :public CommandTS<StructureTS> {	
+	GetSystemUser *getUser = nullptr;
+	FindTestStatisticsForUser* getStst = nullptr;
+	StatisticsAddElem* addStat = nullptr;
+
+	
+	StatisticsElem* findStat = nullptr;
+	SystemUser* sUser = nullptr;
 	IElementTS* test_ = nullptr;
+	StatisticsElem *rezStat = nullptr;
 public:
-	BeginTest(StructureTS* strcTS) :CommandTS<StructureTS>(strcTS) {}
+	BeginTest(StructureTS* strcTS, GetSystemUser* getUser, FindTestStatisticsForUser* getStst, StatisticsAddElem *addStat)
+		:CommandTS<StructureTS>(strcTS) {		
+		this->getUser = getUser;
+		this->getStst = getStst;
+		this->addStat = addStat;
+	}
 	void execute()override {
 		system("cls");
 		cout << "Процесс тестирования" << endl;
 		cout << "-------------------------------------\n" << endl;
-		reseiver_->beginTesting();
+		//получить пользователя
+		getUser->execute();
+		try {
+			sUser = getUser->getFindUser();
+			//получить тест
+			test_ = reseiver_->getTest();			
+			//получить результаты статистики по тесту для пользователя
+			getStst->setParam(sUser->getLogin(), test_->getName(), (test_->getParent())->getName());
+			getStst->execute();
+			findStat = getStst->getFindStat();
+			//запустить тестирование и получить результаты
+			rezStat = reseiver_->beginTesting(test_, findStat);
+			rezStat->print();
+			addStat->setParam(rezStat);
+			addStat->execute();
+
+		}
+		catch (ErrorTS err) { cout << err.getError() << endl; }		
+	}	
+
+	~BeginTest() {
+		if(getUser != nullptr) delete getUser;
+		if (getStst != nullptr) delete getStst;
+		if (addStat != nullptr) delete addStat;
 	}
-	void setTest(IElementTS* test_) {this->test_=test_; }
+};
+
+class UserGetStatistics :public CommandTS<SystemLoginTS> {	
+	SystemUser* sUser = nullptr;
+	FindUserStatistics* findUserStat=nullptr;
+public:
+	UserGetStatistics(SystemLoginTS* sLgn, FindUserStatistics* fus) :CommandTS<SystemLoginTS>(sLgn), findUserStat(fus) {}
+	void execute()override {
+		sUser = reseiver_->getSystemUser();
+		findUserStat->setLogin(sUser->getLogin());
+		findUserStat->execute;
+	}
+	
+
+
+};
+//просмотреть статистику пользователя
+class FindUserStatistics :public CommandTS<StatisticsTS> {
+	string login;
+public:
+	FindUserStatistics(StatisticsTS* ststcTS) :CommandTS<StatisticsTS>(ststcTS) {}
+	void execute()override {
+		reseiver_->findUserStatistic(login);
+	}
+	void setLogin(string login) { this->login = login; }
 
 };
 
+class FindTestStatisticsForUser :public CommandTS<StatisticsTS> {
+	string login;
+	string testName;
+	string testCategory;
+	StatisticsElem* findStat = nullptr;
+	
+public:
+	FindTestStatisticsForUser(StatisticsTS* ststcTS):CommandTS<StatisticsTS>(ststcTS) {}
+	void execute()override {
+		findStat = reseiver_->findTestStatisticForUser(this->login, this->testName, this->testCategory);
+	}
+	void setParam(string login, string testName, string testCategory) {
+		this->login = login;
+		this->testName = testName;
+		this->testCategory = testCategory;
+	}
+	StatisticsElem* getFindStat() {
+		return this->findStat;
+	}
+};
+class StatisticsAddElem :public CommandTS<StatisticsTS> {
+	StatisticsElem* stEl = nullptr;
+public:
+	StatisticsAddElem (StatisticsTS *ststcTS) :CommandTS<StatisticsTS>(ststcTS) {}
+	void execute()override {
+		reseiver_->add(this->stEl);
+	}
+
+	void setParam(StatisticsElem* el) {
+		this->stEl = el;
+	}
+
+};
+
+
+class GetSystemUser :public CommandTS<SystemLoginTS> {
+	SystemUser* sUser = nullptr;
+public:
+	GetSystemUser(SystemLoginTS* sLgn) :CommandTS<SystemLoginTS>(sLgn) {}
+	void execute()override {		
+		sUser = reseiver_->getSystemUser();		
+	}
+	SystemUser* getFindUser() { return this->sUser; }
+};
 
 class AdminEditUser :public CommandTS<SystemLoginTS> {	
 public:

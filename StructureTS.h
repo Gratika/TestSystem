@@ -102,42 +102,42 @@ public:
 	IElementTS* getTest() {
 		IElementTS* test_ = this->getCategory();
 		if (test_->getType() != "TestTS") throw ObjectInfoNotFound("Выбранный Вами элемент не является тестом");
-		test_->loadFromFile(efactory);
+		if(test_->getSize ==0) test_->loadFromFile(efactory);
 		return test_;
 	}
 	
 	//Процес тестирования
-	StatisticsElem* beginTesting(IElementTS* test_, StatisticsElem *stEl) {
+	StatisticsElem* beginTesting(IElementTS* test_, StatisticsElem *bgnStEl) {
 		int beginNo = 0; int id = 0;
-		if (stEl != nullptr && !stEl->isFinished()) {
-			cout << "Вы остановились на вопросе №" << stEl->getNoLast() << ". Продолжить проходжение теста(д) или начать сначала(н)?" << endl;
+		if (bgnStEl != nullptr && !bgnStEl->isFinished()) {
+			cout << "Вы остановились на вопросе №" << bgnStEl->getNoLast() << ". Продолжить проходжение теста(д) или начать сначала(н)?" << endl;
 			char ch;
 			cin >> ch;
 			cin.ignore(3200, '\n');
-			if (ch == 'д') beginNo = stEl->getNoLast() + 1;
+			if (ch == 'д') beginNo = bgnStEl->getNoLast() + 1;
 			else {
-				id = stEl->getId();
-				stEl = nullptr;
+				id = bgnStEl->getId();
+				bgnStEl = nullptr;
 			}
-		}
+		}		
 		StatisticsElem* rezTest = doTesting(test_, beginNo);
-		if (stEl == nullptr) {
+		if (bgnStEl == nullptr) {
 			if (id != 0) rezTest->setId(id);
 			return rezTest;		
 		}
 		else {
-			if (stEl->isFinished()) {
+			if (bgnStEl->isFinished()) {
 				
-				if (rezTest->getGetingMark() > stEl->getGetingMark()) return rezTest;
-				else return stEl;
+				if (rezTest->getGetingMark() > bgnStEl->getGetingMark()) return rezTest;
+				else return bgnStEl;
 			}
 			else {
-				return (stEl->operator+( rezTest));
+				return (bgnStEl->operator+( rezTest));
 			}
-		}
-
-		
+		}		
 	}
+
+
 	StatisticsElem* doTesting(IElementTS* test_, int beginNo) {
 		
 		double getMark = 0, maxMark=test_->getMaxCost();//переменные для статистики
@@ -146,7 +146,7 @@ public:
 			system("cls");
 			cout << "Тест \"" << test_->getName() << "\" (кол-во вопросов: " << test_->getSize() << ")" << endl;
 			cout << "--------------------------------------------------------\n" << endl;
-			IElementTS* qw = test_->getElement[NoQw]; //получаю вопрос по номеру
+			IElementTS* qw = test_->getElement(NoQw); //получаю вопрос по номеру
 			int costQw = qw->getCost();//стоимость вопроса
 			double tmpCostQw = 0;//стоимость ответа, которую получил пользователь
 			cout << "Вопрос №\n" << NoQw +1<<"вес вопроса ("<<costQw<<")"<< endl;
@@ -176,7 +176,7 @@ public:
 			if (round(tmpCostQw) == costAnsw)cntCrtQw++;
 			else cntIncrtQw++;			
 		}
-		StatisticsElem* newStEl = new StatisticsElem((test_->getParent())->getName(), test_->getName(), test_->getSize, maxMark, getMark, cntCrtQw, cntIncrtQw, cntIncrtQw, NoQw);
+		StatisticsElem* newStEl = new StatisticsElem((test_->getParent())->getName(), test_->getName(), test_->getSize(), maxMark, getMark, cntCrtQw, cntIncrtQw, cntIncrtQw, NoQw);
 		return newStEl;
 	}
 	

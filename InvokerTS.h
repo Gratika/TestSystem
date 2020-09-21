@@ -7,12 +7,13 @@
 class InvokerTS {
 	StructureTS* strcTS = nullptr;
 	SystemLoginTS* sLgn = nullptr;
+	StatisticsTS* statTS = nullptr;
 	ShowMainMenu* showMainMenu = nullptr;
 	ShowUserMenu* showUserMenu = nullptr;
 	map<string, CommandTS <StructureTS>*> cmdStrcTs;
 	map<string, CommandTS <SystemLoginTS>*> cmdSlgnTs;
 public:
-	InvokerTS(StructureTS* strcTS_, SystemLoginTS* sLgn_) :strcTS(strcTS_), sLgn(sLgn_) {
+	InvokerTS(StructureTS* strcTS_, SystemLoginTS* sLgn_, StatisticsTS *statTs_) :strcTS(strcTS_), sLgn(sLgn_), statTS(statTs_) {
 		showMainMenu = new ShowMainMenu(sLgn);
 		showUserMenu = new ShowUserMenu(sLgn);
 		/*commands["showMainMenu"] = new ShowMainMenu(sLgn);
@@ -28,6 +29,9 @@ public:
 		cmdSlgnTs["adminCreateUser"] = new AdminCreateUser(sLgn);
 		cmdSlgnTs["userSingUp"] = new UserSinglUp(sLgn);
 		cmdSlgnTs["userLogin"] = new UserLogin(sLgn);
+		//cmdSlgnTs["adminGetStatistics"] = new UserLogin(sLgn);
+		cmdStrcTs["beginTesting"] = new BeginTest(strcTS, new GetSystemUser(sLgn), new FindTestStatisticsForUser(statTS), new StatisticsAddElem(statTS));
+		cmdSlgnTs["userGetStatistics"] = new UserGetStatistics(sLgn,  new FindUserStatistics(statTS));
 	}
 	~InvokerTS() {
 		if(strcTS != nullptr) delete strcTS;

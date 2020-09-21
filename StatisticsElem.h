@@ -18,7 +18,7 @@ class StatisticsElem {
 	int cntIncorrectQw = 0;
 	int cntMissedQw = 0; // оличество пропущенных вопросов
 	int NoLast = 0; //если номер последнего вопроса != testSize тест незакончен
-	long id = 0;
+	long id = -1;
 public:
 	StatisticsElem(){}
 	StatisticsElem(string testCategory, string testName, int testSize, double maxMark, double getMark, int cntCorrectQw, int cntIncorrectQw, int cntMissedQw, int NoLast):
@@ -31,7 +31,7 @@ public:
 	void setTestName(string testName) { this->testName = testName; }
 	void setTestSize(int testSize) { this->testSize = testSize; }
 	void setMaxMark(double maxMark) { this->maxMark = maxMark; }
-	void setGetingMark(double getMark) { this->getMark = getMark; }
+	void setGetingMark(double getMark) { this->getingMark = getMark; }
 	void setCntCorrectQw(int cntCorrectQw) { this->cntCorrectQw = cntCorrectQw; }
 	void setCntIncorrectQw(int cntIncorrectQw) { this->cntIncorrectQw = cntIncorrectQw; }
 	void setCntMissedQw(int cntMissedQw) { this->cntMissedQw = cntMissedQw; }
@@ -44,7 +44,7 @@ public:
 	string getTestName() { return this->testName; }
 	int getTestSize() { return this->testSize; }
 	double getMaxMark() { return this->maxMark; }
-	double getGetingMark() { return this->getMark; }
+	double getGetingMark() { return this->getingMark; }
 	int getCntCorrectQw() { return this->cntCorrectQw; }
 	int getCntIncorrectQw() { return this->cntIncorrectQw ; }
 	int getCntMissedQw() { return this->cntMissedQw; }
@@ -55,13 +55,19 @@ public:
 	bool isFinished() { return (this->testSize-1) == this->NoLast; }
 	
 	bool operator==(StatisticsElem* stElem) {
+		if (this->login == stElem->login && this->testCategory == stElem->testCategory && this->testName == stElem->testName
+			&& this->testSize == stElem->testSize && this->maxMark == stElem->maxMark) return true;
+		return false;
+	}
+
+	bool operator!=(StatisticsElem* stElem) {
 		if (this->login != stElem->login || this->testCategory != stElem->testCategory || this->testName != stElem->testName
-			|| this->testSize != stElem->testSize || this->maxMark != stElem->maxMark) return false;
-		return true;
+			|| this->testSize != stElem->testSize || this->maxMark != stElem->maxMark) return true;
+		return false;
 	}
 	
 	StatisticsElem* operator+(StatisticsElem *stElem) {
-		if (!this->operator==) 
+		if (this != stElem) 
 			throw StatisticsError("Ќельз€ изменить результаты статистики");
 		this->getingMark += stElem->getingMark;
 		this->cntCorrectQw += stElem->cntCorrectQw;
@@ -75,21 +81,21 @@ public:
 	}
 	void print() {
 		cout << "ѕользователь: " << login << ", тест: \"" << testName << "\" (" << testCategory << "), кол-во вопросов: " << testSize << ", макс. баллов:" << maxMark<< "."<< endl;
-		cout << setw(13) << "ѕолучено баллов:" << getMark <<", оценка:"<<mark<< ", кол-во правил.ответов:" << cntCorrectQw << ", кол-во пропущенных вопросов:" << cntMissedQw << "." << endl;
+		cout << setw(13) << "ѕолучено баллов:" << getingMark <<", оценка:"<<mark<< ", кол-во правил.ответов:" << cntCorrectQw << ", кол-во пропущенных вопросов:" << cntMissedQw << "." << endl;
 	}
 
 	void saveToFile(ofstream &out) {
 		out << login << endl;
 		out << testCategory << endl;
 		out << testName << endl;
-		out << testSize << " " << maxMark << " " << getMark << " " << mark << " " << cntCorrectQw << " " << cntIncorrectQw << " " << cntMissedQw << " " << NoLast << endl;
+		out << testSize << " " << maxMark << " " << getingMark << " " << mark << " " << cntCorrectQw << " " << cntIncorrectQw << " " << cntMissedQw << " " << NoLast << endl;
 
 	}
 	void loadFromFile(ifstream& inp) {
 		getline(inp,login);
 		getline(inp, testCategory);
 		getline(inp, testName);
-		inp >> testSize >> maxMark >> getMark >> mark >> cntCorrectQw >> cntIncorrectQw >> cntMissedQw >> NoLast;
+		inp >> testSize >> maxMark >> getingMark >> mark >> cntCorrectQw >> cntIncorrectQw >> cntMissedQw >> NoLast;
 		inp.ignore(2, '\n');		
 	}
 	~StatisticsElem(){}

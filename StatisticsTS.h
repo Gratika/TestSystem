@@ -11,7 +11,9 @@ class StatisticsTS {
 	vector<StatisticsElem*> data;
 public:
 	
-	StatisticsTS() {}
+	StatisticsTS() {
+		loadFromFile();
+	}
 	
 	void loadFromFile() {
 		ifstream inp("StatisticsTS.txt");
@@ -32,8 +34,12 @@ public:
 	bool isEmpty(){	return data.empty();}
 
 	void add(StatisticsElem* el) {
-		el->setId(data.size());
-		data.push_back(el);
+		if(el->getId()==-1){
+			el->setId(data.size());
+			data.push_back(el);
+		}
+		else replace(el);
+		
 	}
 	void replace(StatisticsElem* el) {
 		StatisticsElem* tmp = data[el->getId()];
@@ -58,6 +64,16 @@ public:
 			cout << endl;
 		}
 	}
+
+	StatisticsElem* findTestStatisticForUser(string login,string testName, string testCategory) {
+		StatisticsElem* findStat = nullptr;
+		for (auto el : data) {
+			if (el->getLogin() == login && el->getTestName() == testName && el->getTestCategory() ==testCategory)
+				findStat = el;			
+		}
+		return findStat;
+	}
+
 
 	StatisticsElem* findTestCategoryStatistic(string testCategory) {
 		for (auto el : data) {

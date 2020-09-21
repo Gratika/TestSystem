@@ -251,6 +251,7 @@ public:
 
 
 	ObjectFactory<SystemUser>* getUserFactory() { return this->ufactory; }
+	
 	SystemUser* getSystemUser() { return this->suser; }
 
 	~SystemLoginTS() {
