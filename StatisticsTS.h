@@ -49,7 +49,7 @@ public:
 		}		
 	}
 
-	StatisticsElem* findUserStatistic(string login) {
+	void findUserStatistic(string login) {
 		for (auto el : data) {
 			if (el->getLogin() == login)
 				el->print();
@@ -57,7 +57,7 @@ public:
 		}
 	}
 
-	StatisticsElem* findTestStatistic(string testName) {
+	void findTestStatistic(string testName) {
 		for (auto el : data) {
 			if (el->getTestName() == testName)
 				el->print();
@@ -75,7 +75,7 @@ public:
 	}
 
 
-	StatisticsElem* findTestCategoryStatistic(string testCategory) {
+	void findTestCategoryStatistic(string testCategory) {
 		for (auto el : data) {
 			if (el->getTestCategory() == testCategory)
 				el->print();

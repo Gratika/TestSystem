@@ -196,6 +196,69 @@ public:
 		}
 		return nullptr;
 	}
+	void editUser()  {
+		system("cls");
+		cout << "Введите логин пользователя: ";
+		string sLgn;
+		getline(cin, sLgn);
+		SystemUser *s = findUser(sLgn);
+		if (s == nullptr) cout << "Пользователь не найден" << endl;
+		else {			
+			char rpt = 'н', ch;
+			do {
+				system("cls");
+				cout << "Редактирование пользователя " << s->getLogin() << endl;
+				s->print();
+				cout << "----------------------------------------\n";
+				string st, login, password, name, lname, sname, address, phone;
+				cout << "Что будем менять?" << endl;
+				cout << "1- Фамилию;\n2- Имя;\n3- Отчество;\n4- Домашний адрес;\n5- Телефон;\n6- Логин;\n0- Выход\n";
+				cin >> ch; cin.ignore(2, '\n');
+				switch (ch)
+				{
+				case '1':
+					cout << "Укажите новую фамилию: ";
+					getline(cin, st);
+					s->setSurname(st);
+					break;
+				case '2':
+					cout << "Укажите новое имя: ";
+					getline(cin, st);
+					s->setName(st);
+					break;
+				case '3':
+					cout << "Укажите новое отчество: ";
+					getline(cin, st);
+					s->setLastName(st);
+					break;
+				case '4':
+					cout << "Укажите новый домашний адрес: ";
+					getline(cin, st);
+					s->setAddress(st);
+					break;
+				case '5':
+					cout << "Укажите новый телефон: ";
+					getline(cin, st);
+					s->setPhone(st);
+					break;
+				case '6':
+					cout << "Укажите новый логин: ";
+					st = this->getLogin();
+					s->setLogin(st);
+					break;				
+				case '0':
+					return;
+				default:
+					cout << "Ошибка! Нет такого пункта меню" << endl;
+					break;					
+				}
+				cout << "Хотите изменить другие данные этого пользователя?(д/н): ";
+				cin >> rpt; cin.ignore(2, '\n');
+			} while (rpt == 'д');
+		}
+		
+
+	}
 	void deleteUser() {
 		char rpt = 'н', ch;
 		do {

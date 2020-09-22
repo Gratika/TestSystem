@@ -28,10 +28,10 @@ public:
 		cmdSlgnTs["adminDeleteUser"] = new AdminDeleteUser(sLgn);
 		cmdSlgnTs["adminCreateUser"] = new AdminCreateUser(sLgn);
 		cmdSlgnTs["userSingUp"] = new UserSinglUp(sLgn);
-		cmdSlgnTs["userLogin"] = new UserLogin(sLgn);
-		//cmdSlgnTs["adminGetStatistics"] = new UserLogin(sLgn);
-		cmdStrcTs["beginTesting"] = new BeginTest(strcTS, new GetSystemUser(sLgn), new FindTestStatisticsForUser(statTS), new StatisticsAddElem(statTS));
-		cmdSlgnTs["userGetStatistics"] = new UserGetStatistics(sLgn,  new FindUserStatistics(statTS));
+		cmdSlgnTs["userLogin"] = new UserLogin(sLgn);		
+		cmdStrcTs["beginTesting"] = new BeginTest(strcTS,statTS, sLgn);
+		cmdSlgnTs["userGetStatistics"] = new UserGetStatistics(sLgn, statTS);
+		cmdSlgnTs["adminGetStatistics"] = new AdminGetStatistics(sLgn,statTS,strcTS);
 	}
 	~InvokerTS() {
 		if(strcTS != nullptr) delete strcTS;

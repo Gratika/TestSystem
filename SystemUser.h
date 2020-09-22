@@ -29,8 +29,7 @@ public:
 	void print() {
 		cout << sname<<" "<<name<<" "<<lname<< " login: " << login << " address: " << address << " phone: " << phone << endl;
 	}
-	virtual string showMenu() { return ""; }	
-	virtual void editUser(SystemUser* s) {}
+	virtual string showMenu() { return ""; }		
 	string getLogin() { return this->login; }
 	string getRole() { return this->role; }
 	string getSurname() { return this->sname; }
@@ -64,7 +63,7 @@ public:
 			cout << "Пользователь " << login << "( " << getUserFio() << ")\n" << endl;
 			cout << "--------------------------------------------------------\n" << endl;
 			cout << "Какое действие Вы хотите выполнить?" << endl;
-			cout << "\n0- Выход \n1- Пройти тестирование\n2- Посмотреть результаты\n3- Продолжить тестирование\n4" << endl;
+			cout << "\n0- Выход \n1- Пройти тестирование\n2- Посмотреть статистику\n" << endl;
 			cin >> m;
 			cin.ignore();
 			switch (m)
@@ -72,29 +71,15 @@ public:
 			case '0':
 				return "exit";
 			case '1':
-				return "";
+				return "beginTesting";
 			case '2':
-				return "";
-			case '3':
-				return "";
+				return "userGetStatistics";			
 			default:
 				cout << "Ошибка ввода. Нет такого пункта меню" << endl;
 				break;
 			}
-		} while (m < '0' || m>'4');
-	}
-	void getResult() {
-		//открыть файл с названием = логин
-		//считать данные (класс ResultTest-??)
-		//отобразить на экран
-	}
-	void doTesting() {
-		//показать дерево тестов
-		//загрузить тест из файла
-	}
-	void saveResult() {
-
-	}
+		} while (m < '0' || m>'3');
+	}	
 };
 
 class SystemAdmin : public SystemUser {
@@ -109,7 +94,7 @@ public:
 			cout << "--------------------------------------------------------\n" << endl;
 			cout << "Какое действие Вы хотите выполнить?" << endl;
 			cout << "\n0- Выход \n1- Создать новую категорию\n2- Создать новый тест\n3- Просмотреть тест\n4- Изменить данные пользователя" << endl;
-			cout << "5- Зарегистрировать нового пользователя\n6- Удалить пользователя \n7- Просмотреть структуру\n8- Просмотреть пользователей" << endl;
+			cout << "5- Зарегистрировать нового пользователя\n6- Удалить пользователя \n7- Просмотреть статистику\n8- Просмотреть пользователей" << endl;
 
 			cin >> m;
 			cin.ignore();
@@ -130,7 +115,7 @@ public:
 			case '6':
 				return"adminDeleteUser";
 			case '7':
-				return"showStructure";
+				return "adminGetStatistics";
 			case '8':
 				return"showAllUser";
 			default:
@@ -138,81 +123,5 @@ public:
 				break;
 			}
 		} while (m < '0' || m > '6');
-	}	
-
-	void editUser(SystemUser* s) override {
-		system("cls");
-		cout << "Редактирование пользователя " << s->getLogin() << endl;
-		s->print();
-		cout << "----------------------------------------\n";
-		char rpt = 'н', ch;
-		do {
-			string st, login, password, name, lname, sname, address, phone;
-			cout << "Что будем менять?" << endl;
-			cout << "1- Фамилию;\n2- Имя;\n3- Отчество;\n4- Домашний адрес;\n5- Телефон;\n6- Логин;\n7- Все\n0- Выход\n";
-			cin >> ch; cin.ignore(2, '\n');
-			switch (ch)
-			{
-			case '1':
-				cout << "Укажите новую фамилию: ";
-				getline(cin, st);
-				s->setSurname(st);
-				break;
-			case '2':
-				cout << "Укажите новое имя: ";
-				getline(cin, st);
-				s->setName(st);
-				break;
-			case '3':
-				cout << "Укажите новое отчество: ";
-				getline(cin, st);
-				s->setLastName(st);
-				break;
-			case '4':
-				cout << "Укажите новый домашний адрес: ";
-				getline(cin, st);
-				s->setAddress(st);
-				break;
-			case '5':
-				cout << "Укажите новый телефон: ";
-				getline(cin, st);
-				s->setPhone(st);
-				break;
-			case '6':
-				cout << "Укажите новый логин: ";
-				st = this->getLogin();
-				s->setLogin(st);
-				break;
-			case '7':
-				cout << "Укажите новую фамилию: ";
-				getline(cin, st);
-				s->setSurname(st);
-				cout << "Укажите новое имя: ";
-				getline(cin, st);
-				s->setName(st);
-				cout << "Укажите новое отчество: ";
-				getline(cin, st);
-				s->setLastName(st);
-				cout << "Укажите новый домашний адрес: ";
-				getline(cin, st);
-				s->setAddress(st);
-				cout << "Укажите новый телефон: ";
-				getline(cin, st);
-				s->setPhone(st);
-				cout << "Укажите новый логин: ";
-				st = this->getLogin();
-				s->setLogin(st);
-			case '0':
-				return;
-			default:
-				cout << "Ошибка! Нет такого пункта меню" << endl;
-				break;
-				break;
-			}
-			cout << "Хотите изменить данные другого пользователя?(д/н): ";
-			cin >> rpt; cin.ignore(2, '\n');
-		} while (rpt == 'д');
-
-
-	}
+	}		
 };

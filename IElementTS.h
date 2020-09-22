@@ -76,6 +76,7 @@ public:
 		double s = 0;
 		for (auto el : elements)
 			s += el->getCost();
+		return s;
 	}
 
 	/*virtual void print() override {

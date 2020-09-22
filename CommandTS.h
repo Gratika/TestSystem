@@ -101,69 +101,6 @@ public:
 	IElementTS* getFindTest() { return this->fTest_; }
 
 };
-
-class BeginTest :public CommandTS<StructureTS> {	
-	GetSystemUser *getUser = nullptr;
-	FindTestStatisticsForUser* getStst = nullptr;
-	StatisticsAddElem* addStat = nullptr;
-
-	
-	StatisticsElem* findStat = nullptr;
-	SystemUser* sUser = nullptr;
-	IElementTS* test_ = nullptr;
-	StatisticsElem *rezStat = nullptr;
-public:
-	BeginTest(StructureTS* strcTS, GetSystemUser* getUser, FindTestStatisticsForUser* getStst, StatisticsAddElem *addStat)
-		:CommandTS<StructureTS>(strcTS) {		
-		this->getUser = getUser;
-		this->getStst = getStst;
-		this->addStat = addStat;
-	}
-	void execute()override {
-		system("cls");
-		cout << "Процесс тестирования" << endl;
-		cout << "-------------------------------------\n" << endl;
-		//получить пользователя
-		getUser->execute();
-		try {
-			sUser = getUser->getFindUser();
-			//получить тест
-			test_ = reseiver_->getTest();			
-			//получить результаты статистики по тесту для пользователя
-			getStst->setParam(sUser->getLogin(), test_->getName(), (test_->getParent())->getName());
-			getStst->execute();
-			findStat = getStst->getFindStat();
-			//запустить тестирование и получить результаты
-			rezStat = reseiver_->beginTesting(test_, findStat);
-			rezStat->print();
-			addStat->setParam(rezStat);
-			addStat->execute();
-
-		}
-		catch (ErrorTS err) { cout << err.getError() << endl; }		
-	}	
-
-	~BeginTest() {
-		if(getUser != nullptr) delete getUser;
-		if (getStst != nullptr) delete getStst;
-		if (addStat != nullptr) delete addStat;
-	}
-};
-
-class UserGetStatistics :public CommandTS<SystemLoginTS> {	
-	SystemUser* sUser = nullptr;
-	FindUserStatistics* findUserStat=nullptr;
-public:
-	UserGetStatistics(SystemLoginTS* sLgn, FindUserStatistics* fus) :CommandTS<SystemLoginTS>(sLgn), findUserStat(fus) {}
-	void execute()override {
-		sUser = reseiver_->getSystemUser();
-		findUserStat->setLogin(sUser->getLogin());
-		findUserStat->execute;
-	}
-	
-
-
-};
 //просмотреть статистику пользователя
 class FindUserStatistics :public CommandTS<StatisticsTS> {
 	string login;
@@ -176,14 +113,35 @@ public:
 
 };
 
+class FindTestStatistics :public CommandTS<StatisticsTS> {
+	string testName;
+public:
+	FindTestStatistics(StatisticsTS* ststcTS) :CommandTS<StatisticsTS>(ststcTS) {}
+	void execute()override {
+		reseiver_->findTestStatistic(this->testName);
+	}
+	void setTestName(string tName) { this->testName = tName; }
+};
+
+class FindCategoryStatistics :public CommandTS<StatisticsTS> {
+	string categoryName;
+public:
+	FindCategoryStatistics(StatisticsTS* ststcTS) :CommandTS<StatisticsTS>(ststcTS) {}
+	void execute()override {
+		reseiver_->findTestCategoryStatistic(this->categoryName);
+	}
+	void setCategoryName(string cName) { this->categoryName = cName; }
+
+};
+
 class FindTestStatisticsForUser :public CommandTS<StatisticsTS> {
 	string login;
 	string testName;
 	string testCategory;
 	StatisticsElem* findStat = nullptr;
-	
+
 public:
-	FindTestStatisticsForUser(StatisticsTS* ststcTS):CommandTS<StatisticsTS>(ststcTS) {}
+	FindTestStatisticsForUser(StatisticsTS* ststcTS) :CommandTS<StatisticsTS>(ststcTS) {}
 	void execute()override {
 		findStat = reseiver_->findTestStatisticForUser(this->login, this->testName, this->testCategory);
 	}
@@ -199,7 +157,7 @@ public:
 class StatisticsAddElem :public CommandTS<StatisticsTS> {
 	StatisticsElem* stEl = nullptr;
 public:
-	StatisticsAddElem (StatisticsTS *ststcTS) :CommandTS<StatisticsTS>(ststcTS) {}
+	StatisticsAddElem(StatisticsTS* ststcTS) :CommandTS<StatisticsTS>(ststcTS) {}
 	void execute()override {
 		reseiver_->add(this->stEl);
 	}
@@ -215,20 +173,165 @@ class GetSystemUser :public CommandTS<SystemLoginTS> {
 	SystemUser* sUser = nullptr;
 public:
 	GetSystemUser(SystemLoginTS* sLgn) :CommandTS<SystemLoginTS>(sLgn) {}
-	void execute()override {		
-		sUser = reseiver_->getSystemUser();		
+	void execute()override {
+		sUser = reseiver_->getSystemUser();
 	}
 	SystemUser* getFindUser() { return this->sUser; }
 };
+
+class BeginTest :public CommandTS<StructureTS> {	
+		
+	SystemUser* sUser = nullptr;
+	IElementTS* test_ = nullptr;
+	StatisticsElem* rezStat = nullptr;
+	StatisticsTS* stat = nullptr;
+	SystemLoginTS* sLgn = nullptr;
+	StatisticsElem* findStat = nullptr;	
+public:
+	BeginTest(StructureTS* strcTS, StatisticsTS* stat, SystemLoginTS* sLgn):CommandTS<StructureTS>(strcTS),stat(stat), sLgn(sLgn) {}
+	void execute()override {
+		system("cls");
+		cout << "Процесс тестирования" << endl;
+		cout << "-------------------------------------\n" << endl;
+		//получить пользователя
+		shared_ptr<GetSystemUser> getSUser = make_shared <GetSystemUser>(sLgn);
+		getSUser->execute();
+		try {
+			sUser = getSUser->getFindUser();
+			//получить тест
+			test_ = reseiver_->getTest();			
+			//получить результаты статистики по тесту для пользователя
+			shared_ptr<FindTestStatisticsForUser> getStst = make_shared <FindTestStatisticsForUser>(stat);
+			getStst->setParam(sUser->getLogin(), test_->getName(), (test_->getParent())->getName());
+			getStst->execute();
+			findStat = getStst->getFindStat();
+			//запустить тестирование и получить результаты
+			rezStat = reseiver_->beginTesting(test_, findStat);
+			rezStat->print();
+			shared_ptr<StatisticsAddElem> addStat = make_shared <StatisticsAddElem>(stat);
+			addStat->setParam(rezStat);
+			addStat->execute();					
+		}
+		catch (ErrorTS err) { 
+			cout << err.getError() << endl;
+		}	
+		system("pause");
+	}	
+	~BeginTest() {}
+};
+
+class UserGetStatistics :public CommandTS<SystemLoginTS> {	
+	SystemUser* sUser = nullptr;
+	StatisticsTS  *stat;	
+public:
+	UserGetStatistics(SystemLoginTS* sLgn, StatisticsTS *stat) :CommandTS<SystemLoginTS>(sLgn),stat(stat) {}
+	void execute()override {
+		sUser = reseiver_->getSystemUser();	
+		shared_ptr<FindUserStatistics> fus = make_shared<FindUserStatistics>(stat);
+		fus->setLogin(sUser->getLogin());
+		fus->execute();	
+		system("pause");
+	}
+	~UserGetStatistics() {}
+};
+
+class GetStructureElem :public CommandTS<StructureTS> {
+	IElementTS* elemST = nullptr;
+public:
+	GetStructureElem(StructureTS* strcTS) :CommandTS<StructureTS>(strcTS) {}
+	void execute()override {
+		elemST = reseiver_->getCategory();
+	}
+	IElementTS* getFindElem() { return this->elemST; }
+};
+
+class AdminGetStatistics :public CommandTS<SystemLoginTS> {
+	SystemUser* sUser = nullptr;
+	IElementTS* elemST = nullptr;
+	StatisticsTS* stat = nullptr;
+	StructureTS* strTS = nullptr;
+	/*FindUserStatistics* findUserStat = nullptr;
+	GetStructureElem* getElem = nullptr;
+	FindTestStatistics* findTestStat = nullptr;
+	FindCategoryStatistics* findCategStat = nullptr;*/
+public:
+	AdminGetStatistics(SystemLoginTS* sLgn, StatisticsTS* stat, StructureTS* strTS) :CommandTS<SystemLoginTS>(sLgn), stat(stat), strTS(strTS) {}
+	void execute()override {
+		system("cls");
+		cout << "Раздел статистики" << endl;
+		cout << "-------------------------------------\n" << endl;	
+		char ch;
+		do {
+			cout << "Что желаете просмотреть?\n1- Статистика по пользователю\n2- Статистика по категории\n3- Статистика по тесту\n0- Выход" << endl;
+			cin >> ch;
+			cin.ignore(3200, '\n');
+			string sLgn;
+			switch (ch)
+			{
+			case '1':
+				system("cls");
+				cout << "Статистика пользователя" << endl;
+				cout << "-------------------------------------\n" << endl;
+				cout << "Введите логин пользователя: ";
+				getline(cin, sLgn);
+				sUser = reseiver_->findUser(sLgn);
+				if (sUser == nullptr) cout << "Пользователь не найден" << endl;
+				else {
+					shared_ptr< FindUserStatistics> findUserStat = make_shared<FindUserStatistics>(stat);
+					findUserStat->setLogin(sUser->getLogin());
+					findUserStat->execute();
+				}				
+				break;
+			case '2':
+				try {
+					shared_ptr<GetStructureElem> getElem = make_shared<GetStructureElem>(strTS);
+					getElem->execute();
+					elemST = getElem->getFindElem();
+					if (elemST->getType() != "TestTS") cout << ("Выбранный Вами элемент не является тестом");
+					else {
+						shared_ptr< FindTestStatistics> findTestStat = make_shared<FindTestStatistics>(stat);
+						findTestStat->setTestName(elemST->getName());
+						findTestStat->execute();
+					}
+				}
+				catch (ErrorTS err) { cout << err.getError() << endl; }				
+				break;
+			case '3':
+				try {
+					shared_ptr<GetStructureElem> getCElem = make_shared<GetStructureElem>(strTS);
+					getCElem->execute();
+					elemST = getCElem->getFindElem();
+					if (elemST->getType() != "TestCategoryTS") cout << ("Выбранный Вами элемент не является категорией");
+					else {
+						shared_ptr<FindCategoryStatistics> findCategStat = make_shared<FindCategoryStatistics>(stat);
+						findCategStat->setCategoryName((elemST->getParent())->getName());
+						findCategStat->execute();
+					}
+				}
+				catch (ErrorTS err) { cout << err.getError() << endl; }
+				break;
+			case '0':
+				return;
+			default:
+				cout << "Ошибка ввода! Нет такого пункта меню..." << endl;
+				break;
+			}
+			system("pause");
+		} while (true);			
+	}
+	~AdminGetStatistics() {	}
+};
+
+
+
+
+
 
 class AdminEditUser :public CommandTS<SystemLoginTS> {	
 public:
 	AdminEditUser(SystemLoginTS *sLgn) :CommandTS<SystemLoginTS>(sLgn){}
 	void execute()override {
-		string lgn = reseiver_->getLogin();
-		SystemUser* s = reseiver_->findUser(lgn);
-		if (s == nullptr)cout << "Пользователь не найден" << endl;
-		else reseiver_->getSystemUser()->editUser(s);
+		reseiver_->editUser();
 		reseiver_->saveUsersToFile();
 	}
 };

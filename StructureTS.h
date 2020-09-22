@@ -102,7 +102,7 @@ public:
 	IElementTS* getTest() {
 		IElementTS* test_ = this->getCategory();
 		if (test_->getType() != "TestTS") throw ObjectInfoNotFound("Выбранный Вами элемент не является тестом");
-		if(test_->getSize ==0) test_->loadFromFile(efactory);
+		if(test_->getSize() ==0) test_->loadFromFile(efactory);
 		return test_;
 	}
 	
@@ -149,7 +149,7 @@ public:
 			IElementTS* qw = test_->getElement(NoQw); //получаю вопрос по номеру
 			int costQw = qw->getCost();//стоимость вопроса
 			double tmpCostQw = 0;//стоимость ответа, которую получил пользователь
-			cout << "Вопрос №\n" << NoQw +1<<"вес вопроса ("<<costQw<<")"<< endl;
+			cout << "Вопрос № " << NoQw +1<<"вес вопроса ("<<costQw<<")"<< endl;
 			qw->print();
 			int costAnsw = getCostAnswer(qw);//стоимость ответа(на случай нескольких правильных ответов)
 			char ch = 'н';
