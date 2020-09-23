@@ -8,22 +8,7 @@
 using namespace std;
 int main() {
 	SetConsoleCP(1251);
-	SetConsoleOutputCP(1251);
-	//SystemLoginTS sl;
-	//sl.showMainMenu();
-	//StructureTS st;
-	//st.print();
-	/*ofstream out("Математика.txt");
-	out << "TestCategoryTS" << endl;
-	out << "Арифметика" << endl;
-	out << "TestCategoryTS" << endl;
-	out << "Алгебра" << endl;
-	out << "TestCategoryTS" << endl;
-	out << "Математический анализ" << endl;
-	out << "TestTS" << endl;
-	out << "Сложение и вычитание чисел" << endl;	
-	out.close();*/
+	SetConsoleOutputCP(1251);	
 	shared_ptr<InvokerTS>invoker_ = make_shared <InvokerTS>(new StructureTS(), new SystemLoginTS(), new StatisticsTS());
-	//InvokerTS<StructureTS, SystemLoginTS> *invoker_ = new InvokerTS<StructureTS, SystemLoginTS>(new StructureTS(), new SystemLoginTS())
-	invoker_->mainScript();
+	invoker_->mainScript();	
 }

@@ -43,6 +43,7 @@ public:
 		out.close();
 	}
 	string showMainMenu() {
+		system("cls");
 		showName();
 		if (!userExist("admin")) this->createAdmin();
 		system("cls");
@@ -123,8 +124,7 @@ public:
 		newUser->setParam(login, role, sname, name, lname, address, phone);
 		users.push_back(newUser);
 		this->saveUsersToFile();
-		cout << "\nРегистрация успешна.\n" << endl;	
-		system("pause");
+		cout << "\nРегистрация успешна.\n" << endl;			
 	}
 	string showUserMenu() {
 		return suser->showMenu();

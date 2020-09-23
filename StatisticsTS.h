@@ -42,27 +42,32 @@ public:
 		
 	}
 	void replace(StatisticsElem* el) {
-		StatisticsElem* tmp = data[el->getId()];
-		if (tmp != el) {
-			data[el->getId()] = el;
-			delete tmp;
-		}		
+		data.erase(data.begin()+el->getId()-1);
+		data.insert(data.begin() + el->getId()-1, el);		
 	}
 
 	void findUserStatistic(string login) {
+		bool flag = false;
 		for (auto el : data) {
-			if (el->getLogin() == login)
+			if (el->getLogin() == login){
 				el->print();
+				flag = true;
+			}
 			cout << endl;
 		}
+		if (!flag) cout << "\nК сожалению, мы ничего не нашли..." << endl;
 	}
 
 	void findTestStatistic(string testName) {
+		bool flag = false;
 		for (auto el : data) {
-			if (el->getTestName() == testName)
+			if (el->getTestName() == testName){
 				el->print();
+				flag = true;
+			}
 			cout << endl;
 		}
+		if (!flag) cout << "\nК сожалению, мы ничего не нашли..." << endl;
 	}
 
 	StatisticsElem* findTestStatisticForUser(string login,string testName, string testCategory) {
@@ -76,11 +81,15 @@ public:
 
 
 	void findTestCategoryStatistic(string testCategory) {
+		bool flag = false;
 		for (auto el : data) {
-			if (el->getTestCategory() == testCategory)
+			if (el->getTestCategory() == testCategory) {
 				el->print();
+				flag = true;
+			}
 			cout << endl;
 		}
+		if (!flag) cout << "\nК сожалению, мы ничего не нашли..." << endl;
 	}
 
 	void saveToFile() {

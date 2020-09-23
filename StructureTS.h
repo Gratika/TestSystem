@@ -110,11 +110,11 @@ public:
 	StatisticsElem* beginTesting(IElementTS* test_, StatisticsElem *bgnStEl) {
 		int beginNo = 0; int id = 0;
 		if (bgnStEl != nullptr && !bgnStEl->isFinished()) {
-			cout << "Вы остановились на вопросе №" << bgnStEl->getNoLast() << ". Продолжить проходжение теста(д) или начать сначала(н)?" << endl;
+			cout << "Вы остановились на вопросе №" << (bgnStEl->getNoLast())+1 << ". Продолжить проходжение теста(д) или начать сначала(н)?" << endl;
 			char ch;
 			cin >> ch;
 			cin.ignore(3200, '\n');
-			if (ch == 'д') beginNo = bgnStEl->getNoLast() + 1;
+			if (ch == 'д') beginNo = bgnStEl->getNoLast();
 			else {
 				id = bgnStEl->getId();
 				bgnStEl = nullptr;
@@ -141,52 +141,63 @@ public:
 	StatisticsElem* doTesting(IElementTS* test_, int beginNo) {
 		
 		double getMark = 0, maxMark=test_->getMaxCost();//переменные для статистики
-		int cntCrtQw = 0, cntIncrtQw = 0, cntMsnQw = 0, NoQw; 		
-		for ( NoQw= beginNo; NoQw < test_->getSize(); NoQw++) { //перебираем вопросы теста
+		int cntCrtQw = 0, cntIncrtQw = 0, cntMsnQw = 0, NoLast;		
+		int NoAnsw;
+		for ( int NoQw= beginNo; NoQw < test_->getSize(); NoQw++) { //перебираем вопросы теста
 			system("cls");
 			cout << "Тест \"" << test_->getName() << "\" (кол-во вопросов: " << test_->getSize() << ")" << endl;
 			cout << "--------------------------------------------------------\n" << endl;
+			NoLast = NoQw;
 			IElementTS* qw = test_->getElement(NoQw); //получаю вопрос по номеру
 			int costQw = qw->getCost();//стоимость вопроса
 			double tmpCostQw = 0;//стоимость ответа, которую получил пользователь
-			cout << "Вопрос № " << NoQw +1<<"вес вопроса ("<<costQw<<")"<< endl;
+			cout << "Вопрос № " << NoQw +1<<" (вес вопроса - "<<costQw<<" б.)"<< endl;
 			qw->print();
-			int costAnsw = getCostAnswer(qw);//стоимость ответа(на случай нескольких правильных ответов)
+			int cntCrctAnsw = getCountCorrectAnswer(qw);//количество правильных ответов
+			int allAnsw = 0, getCntCrctAnsw = 0;
 			char ch = 'н';
-			do {
-				int NoAnsw; 
-				cout << "Укажите правильный, на ваш взгляд, вариант ответа(0 - пропустить вопрос):";
+			do {				
+				cout << "Укажите правильный, на ваш взгляд, вариант ответа(0 - пропустить вопрос, -1 - прервать тестирование):";
 				do {
 					NoAnsw = getValue();
-					if (NoAnsw < 0 || NoAnsw >= qw->getSize())
+					if (NoAnsw < 0 || NoAnsw > qw->getSize())
 						cout << "Ошибочный ввод. Еще попытка: ";
-				} while (NoAnsw < 0 || NoAnsw >= qw->getSize());
-				
-				if (NoAnsw != 0) {//если пользователь не пропускает вопрос
+				} while ((NoAnsw < 0 || NoAnsw > qw->getSize()) && (NoAnsw!=-1) );
+
+				if (NoAnsw != 0 && NoAnsw != -1) {//если пользователь не пропускает вопрос
+					allAnsw++;
 					if ((qw->getElement(NoAnsw - 1))->getCorrect())
-						tmpCostQw += costAnsw;//считаем полученую стоимость
+						getCntCrctAnsw++;//считаем полученую стоимость
 					cout << "Может есть еще правильные ответы?(д/н): ";
 					cin >> ch;
 				}
 				else cntMsnQw++;//иначе - увеличиваем число пропущенных вопросов
 
 			} while (ch == 'д');
-			getMark += costAnsw;//прибавляем полученную стоимость к общему значению
-			//определяем, куда отнести вопрос: правильно отвеченым или нет
-			if (round(tmpCostQw) == costAnsw)cntCrtQw++;
-			else cntIncrtQw++;			
+			if (NoAnsw != -1) {
+				if (NoAnsw != 0)
+				{
+					getMark += (getCntCrctAnsw * costQw) / cntCrctAnsw / allAnsw;//считаем полученный бал
+				  //определяем, куда отнести вопрос: правильно отвеченым или нет
+					if (cntCrctAnsw==getCntCrctAnsw || (allAnsw-getCntCrctAnsw)*100/cntCrctAnsw>=50)cntCrtQw++;
+					else cntIncrtQw++;
+				}
+			}
+			else {
+				cout << " \nТестирование прервано по запросу пользователя" << endl;
+				break;
+			}			
 		}
-		StatisticsElem* newStEl = new StatisticsElem((test_->getParent())->getName(), test_->getName(), test_->getSize(), maxMark, getMark, cntCrtQw, cntIncrtQw, cntIncrtQw, NoQw);
+		StatisticsElem* newStEl = new StatisticsElem((test_->getParent())->getName(), test_->getName(), test_->getSize(), maxMark, getMark, cntCrtQw, cntIncrtQw, cntMsnQw, NoLast);
 		return newStEl;
 	}
 	
-	double getCostAnswer(IElementTS* question) {
-		int cntCrtQw = 0, costQw = question->getCost();
-		double costAnsw = 0;
+	double getCountCorrectAnswer(IElementTS* question) {
+		int cntCrtQw = 0;
 		for (int i = 0; i < question->getSize(); i++)
 			if ((question->getElement(i))->getCorrect())cntCrtQw++;
-		if (cntCrtQw != 0)costAnsw = (double)(costQw / cntCrtQw);
-		return costAnsw;
+		
+		return cntCrtQw;
 	}
 
 	//Просмотр выбраного теста

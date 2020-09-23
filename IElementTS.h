@@ -106,7 +106,7 @@ public:
 		return this->elements.size();
 	}
 	IElementTS* getElement(int id)override {
-		if (id<0 || id>this->elements.size()) throw OutOfRangeError("¬ыход за пределы допустимого диапазона");
+		if (id<0 || id>=this->elements.size()) throw OutOfRangeError("¬ыход за пределы допустимого диапазона");
 		return elements[id];
 	}
 

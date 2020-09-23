@@ -44,8 +44,7 @@ class UserLogin :public CommandTS<SystemLoginTS> {
 public:
 	UserLogin(SystemLoginTS* sLgn) :CommandTS<SystemLoginTS>(sLgn) {}
 	void execute()override {		
-		this->reseiver_->userLogin();		
-
+			this->reseiver_->userLogin();		
 	}
 };
 
@@ -101,6 +100,13 @@ public:
 	IElementTS* getFindTest() { return this->fTest_; }
 
 };
+class StatisticsSaveToFile :public CommandTS<StatisticsTS> {	
+public:
+	StatisticsSaveToFile(StatisticsTS* ststcTS) :CommandTS<StatisticsTS>(ststcTS) {}
+	void execute()override {
+		reseiver_->saveToFile();
+	}
+};
 //просмотреть статистику пользователя
 class FindUserStatistics :public CommandTS<StatisticsTS> {
 	string login;
@@ -118,6 +124,9 @@ class FindTestStatistics :public CommandTS<StatisticsTS> {
 public:
 	FindTestStatistics(StatisticsTS* ststcTS) :CommandTS<StatisticsTS>(ststcTS) {}
 	void execute()override {
+		system("cls");
+		cout << "Статистика по категории " << this->testName << endl;
+		cout << "-------------------------------------\n" << endl;
 		reseiver_->findTestStatistic(this->testName);
 	}
 	void setTestName(string tName) { this->testName = tName; }
@@ -128,6 +137,9 @@ class FindCategoryStatistics :public CommandTS<StatisticsTS> {
 public:
 	FindCategoryStatistics(StatisticsTS* ststcTS) :CommandTS<StatisticsTS>(ststcTS) {}
 	void execute()override {
+		system("cls");
+		cout << "Статистика по категории " << this->categoryName<< endl;
+		cout << "-------------------------------------\n" << endl;
 		reseiver_->findTestCategoryStatistic(this->categoryName);
 	}
 	void setCategoryName(string cName) { this->categoryName = cName; }
@@ -207,10 +219,15 @@ public:
 			findStat = getStst->getFindStat();
 			//запустить тестирование и получить результаты
 			rezStat = reseiver_->beginTesting(test_, findStat);
+			rezStat->setLogin(sUser->getLogin());
+			system("cls");
+			cout << " \nРезультаты тестирования: " << endl;
 			rezStat->print();
 			shared_ptr<StatisticsAddElem> addStat = make_shared <StatisticsAddElem>(stat);
 			addStat->setParam(rezStat);
-			addStat->execute();					
+			addStat->execute();	
+			shared_ptr<StatisticsSaveToFile> saveStat = make_shared<StatisticsSaveToFile>(stat);
+			saveStat->execute();
 		}
 		catch (ErrorTS err) { 
 			cout << err.getError() << endl;
@@ -226,7 +243,10 @@ class UserGetStatistics :public CommandTS<SystemLoginTS> {
 public:
 	UserGetStatistics(SystemLoginTS* sLgn, StatisticsTS *stat) :CommandTS<SystemLoginTS>(sLgn),stat(stat) {}
 	void execute()override {
-		sUser = reseiver_->getSystemUser();	
+		sUser = reseiver_->getSystemUser();
+		system("cls");
+		cout << "Статистика пользователя " <<sUser->getLogin()<< endl;
+		cout << "-------------------------------------\n" << endl;
 		shared_ptr<FindUserStatistics> fus = make_shared<FindUserStatistics>(stat);
 		fus->setLogin(sUser->getLogin());
 		fus->execute();	
@@ -250,10 +270,7 @@ class AdminGetStatistics :public CommandTS<SystemLoginTS> {
 	IElementTS* elemST = nullptr;
 	StatisticsTS* stat = nullptr;
 	StructureTS* strTS = nullptr;
-	/*FindUserStatistics* findUserStat = nullptr;
-	GetStructureElem* getElem = nullptr;
-	FindTestStatistics* findTestStat = nullptr;
-	FindCategoryStatistics* findCategStat = nullptr;*/
+	
 public:
 	AdminGetStatistics(SystemLoginTS* sLgn, StatisticsTS* stat, StructureTS* strTS) :CommandTS<SystemLoginTS>(sLgn), stat(stat), strTS(strTS) {}
 	void execute()override {
@@ -268,10 +285,8 @@ public:
 			string sLgn;
 			switch (ch)
 			{
-			case '1':
+			case '1':	
 				system("cls");
-				cout << "Статистика пользователя" << endl;
-				cout << "-------------------------------------\n" << endl;
 				cout << "Введите логин пользователя: ";
 				getline(cin, sLgn);
 				sUser = reseiver_->findUser(sLgn);
@@ -284,6 +299,7 @@ public:
 				break;
 			case '2':
 				try {
+					system("cls");
 					shared_ptr<GetStructureElem> getElem = make_shared<GetStructureElem>(strTS);
 					getElem->execute();
 					elemST = getElem->getFindElem();
@@ -298,6 +314,7 @@ public:
 				break;
 			case '3':
 				try {
+					system("cls");
 					shared_ptr<GetStructureElem> getCElem = make_shared<GetStructureElem>(strTS);
 					getCElem->execute();
 					elemST = getCElem->getFindElem();
@@ -351,7 +368,7 @@ public:
 	void execute()override {
 		reseiver_->registerUser(false);
 		reseiver_->saveUsersToFile();
-
+		system("pause");
 	}
 };
 class ShowAllUser :public CommandTS<SystemLoginTS> {

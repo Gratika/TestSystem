@@ -54,20 +54,16 @@ public:
 	
 	bool isFinished() { return (this->testSize-1) == this->NoLast; }
 	
-	bool operator==(StatisticsElem* stElem) {
+	/*bool operator==(StatisticsElem* stElem) {
 		if (this->login == stElem->login && this->testCategory == stElem->testCategory && this->testName == stElem->testName
 			&& this->testSize == stElem->testSize && this->maxMark == stElem->maxMark) return true;
 		return false;
-	}
-
-	bool operator!=(StatisticsElem* stElem) {
-		if (this->login != stElem->login || this->testCategory != stElem->testCategory || this->testName != stElem->testName
-			|| this->testSize != stElem->testSize || this->maxMark != stElem->maxMark) return true;
-		return false;
-	}
+	}*/
+	
 	
 	StatisticsElem* operator+(StatisticsElem *stElem) {
-		if (this != stElem) 
+		if (this->testCategory != stElem->testCategory || this->testName != stElem->testName
+			|| this->testSize != stElem->testSize || this->maxMark != stElem->maxMark)
 			throw StatisticsError("Нельзя изменить результаты статистики");
 		this->getingMark += stElem->getingMark;
 		this->cntCorrectQw += stElem->cntCorrectQw;
@@ -99,4 +95,10 @@ public:
 		inp.ignore(2, '\n');		
 	}
 	~StatisticsElem(){}
+/*private:
+	bool operator!=(StatisticsElem* stElem) {
+		if (this->testCategory != stElem->testCategory || this->testName != stElem->testName
+			|| this->testSize != stElem->testSize || this->maxMark != stElem->maxMark) return true;
+		return false;
+	}*/
 };
