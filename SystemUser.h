@@ -29,7 +29,7 @@ public:
 	void print() {
 		cout << sname<<" "<<name<<" "<<lname<< " login: " << login << " address: " << address << " phone: " << phone << endl;
 	}
-	virtual string showMenu() { return ""; }		
+	virtual string showMenu() = 0;
 	string getLogin() { return this->login; }
 	string getRole() { return this->role; }
 	string getSurname() { return this->sname; }
@@ -45,7 +45,7 @@ public:
 	void setLastName(string lname) { this->lname = lname; }
 	void setAddress(string address) { this->address = address; }
 	void setPhone(string phone) { this->phone = phone; }
-	virtual ~SystemUser() {};
+	virtual ~SystemUser()=0 {};
 
 protected:	
 	string getUserFio() {
