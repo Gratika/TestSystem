@@ -22,6 +22,7 @@ public:
 		this->resultMainMenu = reseiver_->showMainMenu();
 	}
 	string getResultMenu() { return this->resultMainMenu; }
+	~ShowMainMenu(){}
 };
 
 class UserSinglUp :public CommandTS<SystemLoginTS> {
@@ -38,6 +39,7 @@ public:
 		system("pause");
 		
 	}
+	~UserSinglUp(){}
 };
 
 class UserLogin :public CommandTS<SystemLoginTS> {
@@ -46,6 +48,7 @@ public:
 	void execute()override {		
 			this->reseiver_->userLogin();		
 	}
+	~UserLogin(){}
 };
 
 class ShowUserMenu : public CommandTS<SystemLoginTS> {
@@ -56,6 +59,7 @@ public:
 		this->resultMenu = reseiver_->showUserMenu();
 	}
 	string getResultMenu() { return this->resultMenu; }
+	~ShowUserMenu(){}
 };
 
 class CreateCategory :public CommandTS<StructureTS> {	
@@ -64,6 +68,7 @@ public:
 	void execute()override {
 		reseiver_->createCategory();
 	}
+	~CreateCategory(){}
 };
 
 class CreateTest :public CommandTS<StructureTS> {
@@ -72,6 +77,7 @@ public:
 	void execute()override {
 		reseiver_->createTest();
 	}
+	~CreateTest(){}
 };
 
 class ShowStructure :public CommandTS<StructureTS> {
@@ -80,6 +86,7 @@ public:
 	void execute()override {
 		reseiver_->showSrtucture();
 	}
+	~ShowStructure(){}
 };
 
 class ShowTest :public CommandTS<StructureTS> {
@@ -88,6 +95,7 @@ public:
 	void execute()override {
 		reseiver_->showTest();
 	}
+	~ShowTest(){}
 };
 
 class GetTest :public CommandTS<StructureTS> {
@@ -98,7 +106,7 @@ public:
 		fTest_=reseiver_->getTest();
 	}
 	IElementTS* getFindTest() { return this->fTest_; }
-
+	~GetTest(){}
 };
 class StatisticsSaveToFile :public CommandTS<StatisticsTS> {	
 public:
@@ -106,6 +114,7 @@ public:
 	void execute()override {
 		reseiver_->saveToFile();
 	}
+	~StatisticsSaveToFile(){}
 };
 //просмотреть статистику пользователя
 class FindUserStatistics :public CommandTS<StatisticsTS> {
@@ -116,7 +125,7 @@ public:
 		reseiver_->findUserStatistic(login);
 	}
 	void setLogin(string login) { this->login = login; }
-
+	~FindUserStatistics(){}
 };
 
 class FindTestStatistics :public CommandTS<StatisticsTS> {
@@ -130,6 +139,7 @@ public:
 		reseiver_->findTestStatistic(this->testName);
 	}
 	void setTestName(string tName) { this->testName = tName; }
+	~FindTestStatistics(){}
 };
 
 class FindCategoryStatistics :public CommandTS<StatisticsTS> {
@@ -143,6 +153,7 @@ public:
 		reseiver_->findTestCategoryStatistic(this->categoryName);
 	}
 	void setCategoryName(string cName) { this->categoryName = cName; }
+	~FindCategoryStatistics(){}
 
 };
 
@@ -165,6 +176,7 @@ public:
 	StatisticsElem* getFindStat() {
 		return this->findStat;
 	}
+	~FindTestStatisticsForUser(){}
 };
 class StatisticsAddElem :public CommandTS<StatisticsTS> {
 	StatisticsElem* stEl = nullptr;
@@ -177,7 +189,7 @@ public:
 	void setParam(StatisticsElem* el) {
 		this->stEl = el;
 	}
-
+	~StatisticsAddElem(){}
 };
 
 
@@ -189,6 +201,7 @@ public:
 		sUser = reseiver_->getSystemUser();
 	}
 	SystemUser* getFindUser() { return this->sUser; }
+	~GetSystemUser(){}
 };
 
 class BeginTest :public CommandTS<StructureTS> {	
@@ -239,7 +252,7 @@ public:
 
 class UserGetStatistics :public CommandTS<SystemLoginTS> {	
 	SystemUser* sUser = nullptr;
-	StatisticsTS  *stat;	
+	StatisticsTS  *stat=nullptr;	
 public:
 	UserGetStatistics(SystemLoginTS* sLgn, StatisticsTS *stat) :CommandTS<SystemLoginTS>(sLgn),stat(stat) {}
 	void execute()override {
@@ -263,6 +276,7 @@ public:
 		elemST = reseiver_->getCategory();
 	}
 	IElementTS* getFindElem() { return this->elemST; }
+	~GetStructureElem(){}
 };
 
 class AdminGetStatistics :public CommandTS<SystemLoginTS> {
@@ -274,11 +288,12 @@ class AdminGetStatistics :public CommandTS<SystemLoginTS> {
 public:
 	AdminGetStatistics(SystemLoginTS* sLgn, StatisticsTS* stat, StructureTS* strTS) :CommandTS<SystemLoginTS>(sLgn), stat(stat), strTS(strTS) {}
 	void execute()override {
-		system("cls");
-		cout << "Раздел статистики" << endl;
-		cout << "-------------------------------------\n" << endl;	
+		
 		char ch;
 		do {
+			system("cls");
+			cout << "Раздел статистики" << endl;
+			cout << "-------------------------------------\n" << endl;
 			cout << "Что желаете просмотреть?\n1- Статистика по пользователю\n2- Статистика по категории\n3- Статистика по тесту\n0- Выход" << endl;
 			cin >> ch;
 			cin.ignore(3200, '\n');
@@ -297,7 +312,7 @@ public:
 					findUserStat->execute();
 				}				
 				break;
-			case '2':
+			case '3':
 				try {
 					system("cls");
 					shared_ptr<GetStructureElem> getElem = make_shared<GetStructureElem>(strTS);
@@ -312,7 +327,7 @@ public:
 				}
 				catch (ErrorTS err) { cout << err.getError() << endl; }				
 				break;
-			case '3':
+			case '2':
 				try {
 					system("cls");
 					shared_ptr<GetStructureElem> getCElem = make_shared<GetStructureElem>(strTS);
@@ -321,7 +336,7 @@ public:
 					if (elemST->getType() != "TestCategoryTS") cout << ("Выбранный Вами элемент не является категорией");
 					else {
 						shared_ptr<FindCategoryStatistics> findCategStat = make_shared<FindCategoryStatistics>(stat);
-						findCategStat->setCategoryName((elemST->getParent())->getName());
+						findCategStat->setCategoryName(elemST->getName());
 						findCategStat->execute();
 					}
 				}
@@ -351,6 +366,8 @@ public:
 		reseiver_->editUser();
 		reseiver_->saveUsersToFile();
 	}
+
+	~AdminEditUser(){}
 };
 
 class AdminDeleteUser :public CommandTS<SystemLoginTS> {	
@@ -361,6 +378,7 @@ public:
 		reseiver_->saveUsersToFile();
 
 	}
+	~AdminDeleteUser(){}
 };
 class AdminCreateUser :public CommandTS<SystemLoginTS> {	
 public:
@@ -370,6 +388,7 @@ public:
 		reseiver_->saveUsersToFile();
 		system("pause");
 	}
+	~AdminCreateUser(){}
 };
 class ShowAllUser :public CommandTS<SystemLoginTS> {
 public:
@@ -377,6 +396,7 @@ public:
 	void execute()override {
 		reseiver_->showAllUser();
 	}
+	~ShowAllUser(){}
 };
 class ExitTS :public CommandTS<SystemLoginTS> {
 public:
@@ -384,4 +404,5 @@ public:
 	void execute()override {
 		exit(0);
 	}
+	~ExitTS(){}
 };

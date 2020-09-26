@@ -42,7 +42,7 @@ public:
 		this->print();
 		//if (this->parent != nullptr) cout << name << endl; 
 	}
-	virtual IElementTS* getElement(int id) = 0;
+	virtual IElementTS* getElement(int id) {return nullptr;	}
 
 	virtual ~IElementTS() = 0 {}
 protected:
@@ -52,12 +52,15 @@ protected:
 };
 class Leaf : public IElementTS {
 public:
-	int getSize()override {
+	Leaf(){}
+	~Leaf(){}
+
+	/*int getSize()override {
 		return 0;
 	}
 	IElementTS* getElement(int id)override {
 		return nullptr;
-	}
+	}*/
 
 };
 
@@ -161,6 +164,7 @@ public:
 	TestCategoryTS() {
 		this->elType = "TestCategoryTS";
 	}
+	~TestCategoryTS(){}
 
 };
 
@@ -216,6 +220,7 @@ public:
 	void print()override {
 		cout << name << " (тест)" << endl;
 	}
+	~TestTS(){}
 };
 
 class QuestionTS : public ConteinerTS {
@@ -244,6 +249,7 @@ public:
 	/*void show()override {
 
 	}*/
+	~QuestionTS(){}
 };
 
 class AnswerTS : public Leaf {
@@ -270,7 +276,7 @@ public:
 	void show()override {
 		cout << this->name;
 	}*/
-
+	~AnswerTS(){}
 
 };
 

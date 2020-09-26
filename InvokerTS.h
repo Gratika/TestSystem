@@ -36,6 +36,7 @@ public:
 	~InvokerTS() {
 		if(strcTS != nullptr) delete strcTS;
 		if(sLgn != nullptr) delete sLgn;
+		if (statTS != nullptr) delete statTS;
 		if(showMainMenu != nullptr) delete showMainMenu;
 		if(showUserMenu != nullptr) delete showUserMenu;
 	}
@@ -55,6 +56,7 @@ public:
 				}
 				catch (ErrorTS err) {
 					cout << err.getError() << endl;
+					system("pause");
 				}
 			}else this->doCommand(resMmenu);
 		} while (true);

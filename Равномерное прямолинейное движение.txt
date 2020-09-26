@@ -52,6 +52,6 @@ AnswerTS
 AnswerTS
 +24 κμ
 AnswerTS
-+64,8 κμ
++18 κμ
 AnswerTS
 -874 κμ

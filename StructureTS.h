@@ -129,10 +129,16 @@ public:
 			if (bgnStEl->isFinished()) {
 				
 				if (rezTest->getGetingMark() > bgnStEl->getGetingMark()) return rezTest;
-				else return bgnStEl;
+				else { 
+					if (rezTest != nullptr)delete rezTest;
+					return bgnStEl; 
+				}
 			}
 			else {
-				return (bgnStEl->operator+( rezTest));
+				StatisticsElem* rez = bgnStEl->operator+(rezTest);
+				if (rezTest != nullptr)delete rezTest;
+				return (rez);			
+				
 			}
 		}		
 	}
@@ -163,23 +169,24 @@ public:
 					if (NoAnsw < 0 || NoAnsw > qw->getSize())
 						cout << "Ошибочный ввод. Еще попытка: ";
 				} while ((NoAnsw < 0 || NoAnsw > qw->getSize()) && (NoAnsw!=-1) );
-
-				if (NoAnsw != 0 && NoAnsw != -1) {//если пользователь не пропускает вопрос
-					allAnsw++;
-					if ((qw->getElement(NoAnsw - 1))->getCorrect())
-						getCntCrctAnsw++;//считаем полученую стоимость
-					cout << "Может есть еще правильные ответы?(д/н): ";
-					cin >> ch;
-				}
-				else cntMsnQw++;//иначе - увеличиваем число пропущенных вопросов
+				if (NoAnsw != -1) {//если пользователь не прерівает тестирование
+					if (NoAnsw != 0) {//если пользователь не пропускает вопрос
+						allAnsw++;
+						if ((qw->getElement(NoAnsw - 1))->getCorrect())
+							getCntCrctAnsw++;//считаем полученую стоимость
+						cout << "Может есть еще правильные ответы?(д/н): ";
+						cin >> ch;
+					}
+					else cntMsnQw++;//иначе - увеличиваем число пропущенных вопросов
+				}			
 
 			} while (ch == 'д');
 			if (NoAnsw != -1) {
 				if (NoAnsw != 0)
 				{
 					getMark += (getCntCrctAnsw * costQw) / cntCrctAnsw / allAnsw;//считаем полученный бал
-				  //определяем, куда отнести вопрос: правильно отвеченым или нет
-					if (cntCrctAnsw==getCntCrctAnsw || (allAnsw-getCntCrctAnsw)*100/cntCrctAnsw>=50)cntCrtQw++;
+				  //определяем, куда отнести вопрос: правильный или нет
+					if (cntCrctAnsw==getCntCrctAnsw && cntCrctAnsw == allAnsw)cntCrtQw++;
 					else cntIncrtQw++;
 				}
 			}
