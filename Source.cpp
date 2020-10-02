@@ -10,5 +10,5 @@ int main() {
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);	
 	shared_ptr<InvokerTS>invoker_ = make_shared <InvokerTS>(new StructureTS(), new SystemLoginTS(), new StatisticsTS());
-	invoker_->mainScript();	
+	invoker_->mainScript();		
 }

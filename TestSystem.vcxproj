@@ -142,17 +142,21 @@
     <ClCompile Include="SystemLogin.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AnswerTS.h" />
     <ClInclude Include="CommandTS.h" />
     <ClInclude Include="ErrorTS.h" />
     <ClInclude Include="IElementTS.h" />
     <ClInclude Include="InvokerTS.h" />
     <ClInclude Include="MyArrayList.h" />
+    <ClInclude Include="MyFunction.h" />
+    <ClInclude Include="QuestionTS.h" />
     <ClInclude Include="StatisticsElem.h" />
     <ClInclude Include="StatisticsTS.h" />
     <ClInclude Include="StructureTS.h" />
     <ClInclude Include="SystemLogin.h" />
     <ClInclude Include="SystemUser.h" />
     <ClInclude Include="ObjectFactory.h" />
+    <ClInclude Include="TestListTS.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
