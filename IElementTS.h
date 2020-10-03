@@ -32,13 +32,8 @@ public:
 	virtual void saveToFile() {}
 	virtual void add(IElementTS* elem) {}
 	virtual void remove(int id) {}
-	virtual void print() {
-		if (this->parent != nullptr) cout << name << endl;
-	}
-	virtual void show() {
-		this->print();
-		//if (this->parent != nullptr) cout << name << endl; 
-	}
+	virtual void print() {cout << name << endl;}
+	virtual void show() {}
 	virtual IElementTS* getElement(int id) {return nullptr;	}
 
 	virtual ~IElementTS() = 0 {}
@@ -47,8 +42,12 @@ protected:
 		return this->name + ".txt";
 	}
 };
+
 class Leaf : public IElementTS {
 public:
+	void print()override {
+		cout << name<<" (тест)" << endl;
+	}	
 	Leaf(){}
 	~Leaf(){}
 };
@@ -65,11 +64,21 @@ public:
 		elem->setLevel(this->getLevel() + 1);
 	}	
 
-	
-	virtual void show() override {
+	void print()override {
+		if (this->parent != nullptr) cout << name << endl;		
 		for (int i = 0; i < this->elements.size(); i++) {
-			cout << i + 1 << " ";
-			this->elements[i]->print();
+			int l = this->elements[i]->getLevel();
+			cout << setw(4 * (l-1)) /*<< i + 1 */<< " ";
+			elements[i]->print();
+		}		
+	}
+	
+	virtual void show() override {	
+		string tname = " (тест)";		
+		for (int i = 0; i < this->elements.size(); i++) {			
+			cout << i + 1 << " "<<this->elements[i]->getName();
+			if (!this->elements[i]->isComposite()) cout << tname;
+			cout << endl;
 		}
 
 	}

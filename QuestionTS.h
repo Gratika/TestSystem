@@ -21,25 +21,26 @@ public:
     void print(bool withCorrect = false) {
         cout << name << endl;
         for (int i = 0; i < answers.size(); i++) {
-            cout << "   " << i + 1;
+            cout << "   " << i + 1<<") ";
             answers[i]->print(withCorrect);
         }
     }
 
     void deleteAnsw(int id) {
-        answers.erase(answers.begin+id);
+        answers.erase(answers.begin()+id);
     }
     void addAnswer() {
         AnswerTS* newAnsw = new AnswerTS();
         cin >> newAnsw;
         answers.push_back(newAnsw);
     }
-    void edit() {
-        cout << "Редактирование вопроса:" << endl;
-        print(true);
-        cout << "--------------------------------------------------------------\n" << endl;
+    void edit() {        
         char ch='н';
         do {
+            system("cls");
+            cout << "Редактирование вопроса:" << endl;
+            print(true);
+            cout << "--------------------------------------------------------------\n" << endl;
             cout << "Что меняем?\n1-Формулировку вопроса;\n2-Стоимость вопроса\n3-Ответы\n0-Выход" << endl;
             cin >> ch;
             switch (ch) {
@@ -73,13 +74,14 @@ public:
     }
     //редактирование ответов (варианты выбора действий и их реализация)
     void editAnswer() {
-        system("cls");
-        cout << "Редактирование ответов на вопрос:" << endl;        
-        print();
-        cout << "---------------------------------------\n" << endl;
+      
         char actn = 'н', ch;  
         int answ;
         do {
+            system("cls");
+            cout << "Редактирование ответов на вопрос:" << endl;
+            print();
+            cout << "---------------------------------------\n" << endl;
             cout << "Что будем делать?\n1-изменять ответы; \n2-добавлять ответы;\n3-удалять ответы;" << endl;
             cin >> ch; cin.ignore(32000, '\n');
             switch (ch)
@@ -88,7 +90,7 @@ public:
                 cout << "Какой ответ будем менять?" << endl;
                 answ = getValue();
                 if (answ - 1 < 0 || answ - 1 >= answers.size())throw OutOfRangeError("Ответа с таким номером не существует!");
-                answers[answ]->edit();
+                answers[answ-1]->edit();
                 break;
             case '2':
                 addAnswer();
@@ -109,6 +111,7 @@ public:
     }
 
     void saveToFile(ofstream& out) {
+        out << costQw << endl;
         out << name << endl;
         out << answers.size() << endl;
         for (auto el : answers)
@@ -116,6 +119,7 @@ public:
     }
 
     void loadFromFile(ifstream& inp) {
+        inp >> costQw; inp.ignore(2, '\n');
         getline(inp, this->name);
         int cntAnsw;
         inp >> cntAnsw; inp.ignore(2, '\n');
@@ -154,6 +158,7 @@ public:
             cin >> ch;
             cin.ignore(3200, '\n');
         } while (ch == 'д');
+        return inp;
     }
     ~QuestionTS() {
         answers.~vector();

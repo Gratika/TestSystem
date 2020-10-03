@@ -28,7 +28,7 @@ public:
 		system("cls");
 		cout << "Структура системы" << endl;
 		cout << "-------------------------------------\n" << endl;
-		rootCategory->show();
+		rootCategory->print();
 		system("pause");
 	}
 
@@ -41,13 +41,11 @@ public:
 		char ch = 'н';
 		system("cls");
 		cout << "Создание новой категории" << endl;
-		cout << "-------------------------------------\n" << endl;
-		//string creatorId = "TestCategoryTS";
+		cout << "-------------------------------------\n" << endl;		
 		IElementTS* newElem = nullptr;
 		try {
-			newElem = this->createNewElement(creatorId);
-			//cout << "В какую категорию поместить: " << endl;
-			IElementTS* category_ = this->getCategory();
+			newElem = this->createNewElement(creatorId); //создаем новый структурный элемент			
+			IElementTS* category_ = this->getCategory(); //Выбор родительской категории
 			if (category_->getType() != "TestCategoryTS")
 				cout << "Ваш выбор не является категорией" << endl;
 			else {
@@ -76,11 +74,18 @@ public:
 
 	StatisticsElem* beginTesting(IElementTS* test_, StatisticsElem* bgnStEl) {
 		shared_ptr<TestListTS> newTest = make_shared<TestListTS>(TestListTS(test_->getName()));
-		newTest->beginTesting(bgnStEl, (test_->getParent())->getName());
+		StatisticsElem* statEl = newTest->beginTesting(bgnStEl, (test_->getParent())->getName());
+		return statEl;
 	}
 
-	/*Выбор и загрузка теста из файла
-	return IElementTS* (загруженный тест)*/
+	void showTest() {
+		IElementTS* test_ = getTest();
+		shared_ptr<TestListTS> newTest = make_shared<TestListTS>(TestListTS(test_->getName()));
+		newTest->showTest();
+	}
+
+	/*Выбор теста 
+	return IElementTS* (тест)*/
 	IElementTS* getTest() {
 		IElementTS* test_ = this->getCategory();
 		if (test_->getType() != "TestTS") throw ObjectInfoNotFound("Выбранный Вами элемент не является тестом");		

@@ -143,7 +143,7 @@ public:
 		cout << endl;
 		for (int i = 1; i < 11; i++) {
 			cout << " .";
-			Sleep(1000);
+			Sleep(500);
 		}
 	}
 	void loadUsersFromFile() {

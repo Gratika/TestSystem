@@ -1,23 +1,14 @@
 2
-QuestionTS
 1
 Знак + это:
 4
-AnswerTS
 +операция сложения
-AnswerTS
 -операция вычетания
-AnswerTS
 +операция умножения
-AnswerTS
 -операция деления
-QuestionTS
 4
 выаывпвыапва
 3
-AnswerTS
 +вааа
-AnswerTS
 -вавыаывыв
-AnswerTS
 -ывавыаы

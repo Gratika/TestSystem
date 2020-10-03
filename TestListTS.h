@@ -42,8 +42,9 @@ public:
 	}
 
 	void print(bool withCorrect = false) {
-		for (auto el : questions) {
-			el->print(withCorrect);
+		for (int i = 0; i < this->questions.size(); i++) {
+			cout << i + 1 << " ";
+			questions[i]->print(withCorrect);
 		}
 	}
 
@@ -54,7 +55,7 @@ public:
 	}
 
 	void deleteQw(int id) {
-		questions.erase(questions.begin + id);
+		questions.erase(questions.begin() + id);
 	}
 
 	//Просмотр выбраного теста
@@ -72,7 +73,9 @@ public:
 		if (actn == 'д') {
 			try {
 				editTest();
-				saveToFile();
+				cout << "Сохранить внесенные изменения?(д/н): ";
+				cin >> actn; cin.ignore(2, '\n');
+				if (actn == 'д') saveToFile();
 			}
 			catch (ErrorTS err) {
 				cout << "Ошибка! " << err.getError() << endl;
@@ -115,12 +118,13 @@ public:
 			}
 			cout << "Хотите продолжить редактирование теста?(д/н): ";
 			cin >> actn; cin.ignore(32000, '\n');
-		} while (actn == 'д');
+		} while (actn == 'д');		
 	}
 
 	//Процес тестирования
 	StatisticsElem* beginTesting(StatisticsElem* bgnStEl, string ctgrName) {
-		int beginNo = 0; int id = 0;
+		loadFromFile();
+		int beginNo = 0; int id = -1;
 		if (bgnStEl != nullptr && !bgnStEl->isFinished()) {
 			cout << "Вы остановились на вопросе №" << (bgnStEl->getNoLast()) + 1 << ". Продолжить проходжение теста(д) или начать сначала(н)?" << endl;
 			char ch;
@@ -134,7 +138,7 @@ public:
 		}
 		StatisticsElem* rezTest = doTesting(beginNo, ctgrName);
 		if (bgnStEl == nullptr) {
-			if (id != 0) rezTest->setId(id);
+			if (id != -1) rezTest->setId(id);
 			return rezTest;
 		}
 		else {
@@ -184,7 +188,7 @@ public:
 				if (NoAnsw != -1) {//если пользователь не прерівает тестирование
 					if (NoAnsw != 0) {//если пользователь не пропускает вопрос
 						allAnsw++;
-						if (qw->isCorrect(NoAnsw))
+						if (qw->isCorrect(NoAnsw-1))
 							getCntCrctAnsw++;//считаем полученую стоимость
 						cout << "Может есть еще правильные ответы?(д/н): ";
 						cin >> ch;
@@ -231,7 +235,9 @@ public:
 			cin >> ch;
 			cin.ignore(2, '\n');
 		} while (ch == 'д');
-		saveToFile();
+		cout << "Сохранить внесенные изменения?(д/н): ";
+		cin >> ch;cin.ignore(2, '\n');
+		if(ch == 'д') saveToFile();
 		cout << "Операция успешна" << endl;
 		system("pause");
 	}

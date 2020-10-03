@@ -39,16 +39,17 @@ public:
     }
 
     void saveToFile(ofstream& out) {
-        print(true);
+        if (isCorrect)out << "+";
+        else out << "-";       
+        out << this->name << endl;
     }
 
     void loadFromFile(ifstream& inp) {
-        char crt;
-        inp >> crt;
+        getline(inp, this->name);
+        char crt = name[0];       
         if (crt == '+')this->isCorrect = true;
         else this->isCorrect = false;
-        getline(inp, this->name);
-        inp.ignore('\n');
+        name.erase(0, 1);
     }
     friend istream& operator>>(istream& inp, AnswerTS* answ) {
         cout << "Сформулируйте ответ: ";

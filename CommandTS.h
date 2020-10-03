@@ -66,7 +66,7 @@ class CreateCategory :public CommandTS<StructureTS> {
 public:
 	CreateCategory(StructureTS *strcTS):CommandTS<StructureTS>(strcTS){}
 	void execute()override {
-		reseiver_->createCategory();
+		reseiver_->createCategory("TestCategoryTS");
 	}
 	~CreateCategory(){}
 };
@@ -75,7 +75,7 @@ class CreateTest :public CommandTS<StructureTS> {
 public:
 	CreateTest(StructureTS* strcTS) :CommandTS<StructureTS>(strcTS) {}
 	void execute()override {
-		reseiver_->createTest();
+		reseiver_->createCategory("TestTS");
 	}
 	~CreateTest(){}
 };

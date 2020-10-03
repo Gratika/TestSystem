@@ -69,8 +69,8 @@ public:
 
 	}
 	void print() {
-		cout << "Пользователь: " << login << ", тест: \"" << testName << "\" (" << testCategory << "), кол-во вопросов: " << testSize << ", макс. баллов:" << maxMark<< "."<< endl;
-		cout << setw(13) << "Получено баллов:" << getingMark <<", оценка:"<<mark<< ", кол-во правил.ответов:" << cntCorrectQw << ", кол-во пропущенных вопросов:" << cntMissedQw << "." << endl;
+		cout << "\nПользователь: " << login << ", тест: \"" << testName << "\" (" << testCategory << "), кол-во вопросов: " << testSize << ", макс. баллов:" << maxMark<< "."<< endl;
+		cout << setw(20) << "Получено баллов:" << getingMark <<", оценка:"<<mark<< ", кол-во правил.ответов:" << cntCorrectQw << ", кол-во пропущенных вопросов:" << cntMissedQw << "." << endl;
 	}
 
 	void saveToFile(ofstream &out) {

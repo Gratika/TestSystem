@@ -27,7 +27,11 @@ public:
 		this->phone = phone;
 	}
 	void print() {
-		cout << sname<<" "<<name<<" "<<lname<< " login: " << login << " address: " << address << " phone: " << phone << endl;
+		cout <<'\n'<< sname << " " << name << " " << lname << endl;
+		cout << setw(11) << "login: " << login << endl;
+		cout << setw(11) << "address: " << address << endl;
+		cout<<setw(11)<<"phone: " << phone << endl;
+		cout << "\n-------------------------------------------------------------------------------------------" << endl;
 	}
 	virtual string showMenu() = 0;
 	string getLogin() { return this->login; }
@@ -63,7 +67,7 @@ public:
 			cout << "Пользователь " << login << "( " << getUserFio() << ")\n" << endl;
 			cout << "--------------------------------------------------------\n" << endl;
 			cout << "Какое действие Вы хотите выполнить?" << endl;
-			cout << "\n0- Выход \n1- Пройти тестирование\n2- Посмотреть статистику\n" << endl;
+			cout << "\n0- Выход \n1- Просмотреть структуру\n2- Пройти тестирование\n3- Посмотреть статистику\n" << endl;
 			cin >> m;
 			cin.ignore();
 			switch (m)
@@ -71,8 +75,10 @@ public:
 			case '0':
 				return "exit";
 			case '1':
-				return "beginTesting";
+				return "showStructure";
 			case '2':
+				return "beginTesting";
+			case '3':
 				return "userGetStatistics";			
 			default:
 				cout << "Ошибка ввода. Нет такого пункта меню" << endl;
@@ -93,8 +99,8 @@ public:
 			cout << "Пользователь " << login << "( " << getUserFio() << ")\n" << endl;
 			cout << "--------------------------------------------------------\n" << endl;
 			cout << "Какое действие Вы хотите выполнить?" << endl;
-			cout << "\n0- Выход \n1- Создать новую категорию\n2- Создать новый тест\n3- Просмотреть тест\n4- Изменить данные пользователя" << endl;
-			cout << "5- Зарегистрировать нового пользователя\n6- Удалить пользователя \n7- Просмотреть статистику\n8- Просмотреть пользователей" << endl;
+			cout << "\n0- Выход \n1- Просмотреть структуру\n2- Создать новую категорию\n3- Создать новый тест\n4- Просмотреть тест\n5- Изменить данные пользователя" << endl;
+			cout << "6- Зарегистрировать нового пользователя\n7- Удалить пользователя \n8- Просмотреть статистику\n9- Просмотреть пользователей" << endl;
 
 			cin >> m;
 			cin.ignore();
@@ -103,20 +109,22 @@ public:
 			case '0':
 				return "exit";
 			case '1':
-				return "createCategory";
+				return "showStructure";
 			case '2':
-				return "createTest";
+				return "createCategory";
 			case '3':
-				return "showTest";
+				return "createTest";
 			case '4':
-				return"adminEditUser";
+				return "showTest";
 			case '5':
-				return"adminCreateUser";
+				return"adminEditUser";
 			case '6':
-				return"adminDeleteUser";
+				return"adminCreateUser";
 			case '7':
-				return "adminGetStatistics";
+				return"adminDeleteUser";
 			case '8':
+				return "adminGetStatistics";
+			case '9':
 				return"showAllUser";
 			default:
 				cout << "Ошибка ввода. Нет такого пункта меню" << endl;

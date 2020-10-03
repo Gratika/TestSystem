@@ -42,8 +42,8 @@ public:
 		
 	}
 	void replace(StatisticsElem* el) {
-		data.erase(data.begin()+el->getId()-1);
-		data.insert(data.begin() + el->getId()-1, el);		
+		data.erase(data.begin()+el->getId());
+		data.insert(data.begin() + el->getId(), el);		
 	}
 
 	void findUserStatistic(string login) {
